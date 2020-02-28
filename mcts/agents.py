@@ -17,8 +17,9 @@ class HumanAgent:
     """An agent controlled by a human player's input."""
 
     def act(self, env):
-        indices = input('Input action: ').replace('(', '').replace(')', '').split(',')
-        return tuple(int(x) for x in indices)
+        #indices = input('Input action: ').replace('(', '').replace(')', '').split(',')
+        return int(input('Input action: '))
+        #return tuple(int(x) for x in indices)
 
 
 def epsilon_greedy(epsilon=0.05):
