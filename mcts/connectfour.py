@@ -46,66 +46,32 @@ class ConnectFourEnv:
     def render(self):
         print(self.state)
 
-    def winner(self,action):
-        if (self.rcheck(action),self.ccheck(action),self.dcheck(action),self.acheck(action))!=(0,0,0,0):
-            return np.sign(self.state[action])
+    def winner(self,move):
+        if (self.rcheck(move),self.ccheck(move),self.dcheck(move),self.acheck(move))!=(0,0,0,0):
+            return np.sign(self.state[move])
         return None
         
-    def rcheck(self,action):
+    def rcheck(self,move):
         for i in range(4):
-            count=0
-            for j in range(4):
-                if self.state[action[0],i+j]==self.state[action]:
-                    count=count+1
-                else:
-                    break
-            if count==4:
+            if np.sum(self.state[move[0]][i:i+4])==4*self.state[move]:
                 return 1
         return 0    
             
-    def ccheck(self,action):
-        count=0
-        for i in range(4):
-            if action[0]+i<6 and self.state[action[0]+i,action[1]]==self.state[action]:
-                count=count+1
-            else:
-                break
-        if count==4:
+    def ccheck(self,move):
+        if np.sum(self.state[move[0]:min(move[0]+4,6),move[1]])==4*self.state[move]:
             return 1
         return 0
     
-    def dcheck(self,action):
-        count=1
-        while count!=4:
-            if action[0]-count>=0 and action[1]-count>=0 and self.state[action[0]-count,action[1]-count]==self.state[action]:
-                count=count+1
-            else:
-                break
-        i=1
-        while count!=4:
-            if action[0]+i<6 and action[1]+i<7 and self.state[action[0]+i,action[1]+i]==self.state[action]:
-                count=count+1
-                i=i+1
-            else:
-                break
-        if count==4:
-            return 1
+    def dcheck(self,move):
+        l=self.state.copy().diagonal(move[1]-move[0])
+        for i in range(len(l)-3):
+            if np.sum(l[i:i+4])==4*self.state[move]:
+                return 1
         return 0
     
-    def acheck(self,action):
-        count=1
-        while count!=4:
-            if action[0]-count>=0 and action[1]+count<7 and self.state[action[0]-count,action[1]+count]==self.state[action]:
-                count=count+1
-            else:
-                break
-        i=1
-        while count!=4:
-            if action[0]+i<6 and action[1]-i>=0 and self.state[action[0]+i,action[1]-i]==self.state[action]:
-                count=count+1
-                i=i+1
-            else:
-                break
-        if count==4:
-            return 1
+    def acheck(self,move):
+        l=self.state.copy()[::-1,:].diagonal(move[1]+move[0]-5)
+        for i in range(len(l)-3):
+            if np.sum(l[i:i+4])==4*self.state[move]:
+                return 1
         return 0
