@@ -1,5 +1,7 @@
 """A Connect Four game"""
 
+from .agents import MCTSAgent
+
 import numpy as np
 
 
@@ -75,3 +77,73 @@ class ConnectFourEnv:
             if np.sum(l[i:i+4])==4*self.state[move]:
                 return 1
         return 0
+
+
+class ConnectFourApp:
+    """Application for running a game of Connect Four."""
+
+    def __init__(self, interface):
+        self.env = ConnectFourEnv()
+        self.interface = interface
+
+    def run(self):
+        """Start the application."""
+        while True:
+            entry = self.interface.start()
+            if entry == 'quit':
+                self.interface.close()
+                break
+            else:
+                player = int(entry) - 1
+                agent = MCTSAgent()
+                self.play_games(player, agent)
+
+    def play_games(self, player, agent):
+        """Play games between player and agent."""
+        while True:
+            self.env.reset()
+            total_rewards = np.zeros(self.env.players)
+            while not self.env.done:
+                self.interface.show_board(self.env.state)
+                if self.env.turn == player:
+                    action = self.interface.get_action()
+                    if action == 'quit':
+                        return
+                    elif action == 'restart':
+                        self.env.reset()
+                        total_rewards = np.zeros(self.env.players)
+                        continue
+                    else:
+                        action = int(action) - 1
+                else:
+                    action = agent.act(self.env)
+                _, rewards, _, _ = self.env.step(action)
+                total_rewards += rewards
+            winner = np.argmax(total_rewards)
+            self.interface.show_board(self.env.state)
+            self.interface.show_winner(winner)
+
+
+class TextInterface:
+    """Text interface for playing Connect Four."""
+
+    def start(self):
+        print("Welcome to Connect Four.")
+        return input("Choose player (1 or 2) or quit: ")
+
+    def get_action(self):
+        return input("Choose a column or restart or quit: ")
+
+    def show_board(self, board):
+        board = np.where(board == 0, "_", np.where(board == 1, "X", "O"))
+        print()
+        for row in board:
+            print("|" + "|".join(row) + "|")
+        print()
+        print(" " + " ".join(str(x) for x in range(1, 8)) + " ")
+
+    def show_winner(self, winner):
+        print("Player {0} wins".format(winner + 1))
+
+    def close(self):
+        print("\nThanks for playing!")
