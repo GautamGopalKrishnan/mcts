@@ -1,6 +1,7 @@
 """A Connect Four game"""
 
 from .agents import MCTSAgent
+from .graphics import GraphWin, Text, Point, Rectangle, Circle
 
 import numpy as np
 
@@ -90,7 +91,7 @@ class ConnectFourApp:
         """Start the application."""
         while True:
             entry = self.interface.start()
-            if entry == 'quit':
+            if entry[0].lower() == 'q':
                 self.interface.close()
                 break
             else:
@@ -107,9 +108,9 @@ class ConnectFourApp:
                 self.interface.show_board(self.env.state)
                 if self.env.turn == player:
                     action = self.interface.get_action()
-                    if action == 'quit':
+                    if action[0].lower() == 'q':
                         return
-                    elif action == 'restart':
+                    elif action[0].lower() == 'r':
                         self.env.reset()
                         total_rewards = np.zeros(self.env.players)
                         continue
@@ -147,3 +148,170 @@ class TextInterface:
 
     def close(self):
         print("\nThanks for playing!")
+
+
+class Button:
+    """A button is a labeled rectangle in a window.
+    It is activated or deactivate with the activate()
+    and deactivate() methods. The clicked(p) method
+    returns true if the button is active and p is inside it.
+    
+    From "Python Programming: An Introduction to Computer Science"
+    by John Zelle."""
+    
+    def __init__(self, win, center, width, height, label):
+        w, h = width/2.0, height/2.0
+        x, y = center.getX(), center.getY()
+        self.xmax, self.xmin = x + w, x - w
+        self.ymax, self.ymin = y + h, y - h
+        p1 = Point(self.xmin, self.ymin)
+        p2 = Point(self.xmax, self.ymax)
+        self.rect = Rectangle(p1, p2)
+        self.rect.setFill('lightgray')
+        self.label = Text(center, label)
+        self.deactivate()
+
+    def draw(self, win):
+        self.rect.draw(win)
+        self.label.draw(win)
+
+    def undraw(self):
+        self.rect.undraw()
+        self.label.undraw()
+
+    def clicked(self, p):
+        """Returns true if button active and p is inside."""
+        return (self.active and
+                self.xmin <= p.getX() <= self.xmax and
+                self.ymin <= p.getY() <= self.ymax)
+    
+    def getLabel(self):
+        """Returns the label string of this button."""
+        return self.label.getText()
+    
+    def activate(self):
+        """Sets this button to 'active'."""
+        self.label.setFill('black')
+        self.rect.setWidth(2)
+        self.active = True
+        
+    def deactivate(self):
+        """Sets this button to 'inactive'."""
+        self.label.setFill('darkgrey')
+        self.rect.setWidth(1)
+        self.active = False
+
+
+class BoardView:
+    """Widget for a Connect Four board."""
+    
+    def __init__(self, win, center):
+        self.win = win
+        self.background_color = "green3"
+        self.frame_color = 'yellow'
+        self.piece_colors = ['blue', 'red']
+        cx, cy = center.getX(), center.getY()
+        self.rect = Rectangle(Point(cx - 175, cy - 150),
+                              Point(cx + 175, cy + 150))
+        self.rect.setFill("yellow")
+        self.pieces = [[self._make_piece(Point(50 + 50 * col, 125 + 50 * row), 50)
+                        for col in range(7)]
+                       for row in range(6)]
+        
+    def _make_piece(self, center, size):
+        """Set up the grid of pieces."""
+        piece = Circle(center, size / 2 - 1)
+        piece.setFill(self.background_color)
+        piece.setOutline(self.frame_color)
+        return piece
+    
+    def draw(self, win):
+        self.rect.draw(win)
+        for row in range(6):
+            for col in range(7):
+                self.pieces[row][col].draw(win)
+
+    def undraw(self):
+        self.rect.undraw()
+        for row in range(6):
+            for col in range(7):
+                self.pieces[row][col].undraw()
+
+    def update(self, board):
+        """Draw board state on this widget."""
+        for row in range(6):
+            for col in range(7):
+                if board[row, col] == -1:
+                    self.pieces[row][col].setFill(self.piece_colors[0])
+                elif board[row, col] == 0:
+                    self.pieces[row][col].setFill(self.background_color)
+                elif board[row, col] == 1:
+                    self.pieces[row][col].setFill(self.piece_colors[1])
+
+
+class GraphicInterface:
+    
+    def __init__(self):
+        self.win = GraphWin("Connect Four", 400, 575)
+        self.win.setBackground("green3")
+        self.banner = Text(Point(200, 50), "Connect Four")
+        self.banner.setSize(25)
+        self.banner.setFill("yellow2")
+        self.banner.setStyle("bold")
+        self.banner.draw(self.win)
+        self.start_buttons = [
+            Button(self.win, Point(200, 275), 150, 50, "Player 1"),
+            Button(self.win, Point(200, 350), 150, 50, "Player 2"),
+            Button(self.win, Point(200, 425), 150, 50, "Quit"),
+        ]
+        self.action_buttons = [
+            Button(self.win, Point(50, 450), 50, 50, "1"),
+            Button(self.win, Point(100, 450), 50, 50, "2"),
+            Button(self.win, Point(150, 450), 50, 50, "3"),
+            Button(self.win, Point(200, 450), 50, 50, "4"),
+            Button(self.win, Point(250, 450), 50, 50, "5"),
+            Button(self.win, Point(300, 450), 50, 50, "6"),
+            Button(self.win, Point(350, 450), 50, 50, "7"),
+            Button(self.win, Point(100, 525), 150, 50, "Restart"),
+            Button(self.win, Point(300, 525), 150, 50, "Quit"),
+        ]
+        self.board = BoardView(self.win, Point(200, 250))
+
+    def start(self):
+        for b in self.start_buttons:
+            b.draw(self.win)
+            b.activate()
+        clicked = False
+        while not clicked:
+            p = self.win.getMouse()
+            for b in self.start_buttons:
+                if b.clicked(p):
+                    label = b.getLabel()
+                    clicked = True
+                    break
+        if label != 'Quit':
+            label = label[-1]
+            for b in self.start_buttons:
+                b.undraw()
+            for b in self.action_buttons:
+                b.draw(self.win)
+            self.board.draw(self.win)
+        return label
+
+    def get_action(self):
+        for b in self.action_buttons:
+            b.activate()
+        while True:
+            p = self.win.getMouse()
+            for b in self.action_buttons:
+                if b.clicked(p):
+                    return b.getLabel()
+
+    def show_board(self, board):
+        self.board.update(board)
+
+    def show_winner(self, winner):
+        self.banner.setText("Player {} wins!".format(winner))
+
+    def close(self):
+        self.win.close()
