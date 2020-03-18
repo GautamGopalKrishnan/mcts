@@ -311,7 +311,7 @@ class GraphicInterface:
         self.board.update(board)
 
     def show_winner(self, winner):
-        self.banner.setText("Player {} wins!".format(winner))
+        self.banner.setText("Player {} wins!".format(winner+1))
 
     def close(self):
         self.win.close()
