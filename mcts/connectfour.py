@@ -318,12 +318,14 @@ class GraphicInterface:
         self.board.draw(self.win)
 
     def get_action(self):
+        self.banner.setText("Your turn")
         for b in self.action_buttons:
             b.activate()
         while True:
             p = self.win.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
+                    self.banner.setText("")
                     return b.getLabel()
         
     def update_board(self, board):
