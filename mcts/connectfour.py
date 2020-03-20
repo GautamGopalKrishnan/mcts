@@ -219,13 +219,13 @@ class BoardView:
     
     def __init__(self, win, center):
         self.win = win
-        self.background_color = "green3"
-        self.frame_color = 'yellow'
-        self.piece_colors = ['blue', 'red']
+        self.background_color = "white"
+        self.frame_color = 'blue'
+        self.piece_colors = ['yellow', 'red']
         cx, cy = center.getX(), center.getY()
         self.rect = Rectangle(Point(cx - 175, cy - 150),
                               Point(cx + 175, cy + 150))
-        self.rect.setFill("yellow")
+        self.rect.setFill(self.frame_color)
         self.pieces = [[self._make_piece(Point(50 + 50 * col, 125 + 50 * row), 50)
                         for col in range(7)]
                        for row in range(6)]
@@ -265,10 +265,10 @@ class GraphicInterface:
     
     def __init__(self):
         self.win = GraphWin("Connect Four", 400, 575)
-        self.win.setBackground("green3")
+        self.win.setBackground("white")
         self.banner = Text(Point(200, 50), "")
         self.banner.setSize(25)
-        self.banner.setFill("yellow2")
+        self.banner.setFill("black")
         self.banner.setStyle("bold")
         self.banner.draw(self.win)
         self.start_buttons = [
@@ -328,6 +328,7 @@ class GraphicInterface:
         
     def update_board(self, board):
         self.board.update(board)
+        self.banner.setText("")
 
     def show_winner(self, winner):
         self.banner.setText("Player {} wins!".format(winner + 1))
