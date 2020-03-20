@@ -90,22 +90,24 @@ class ConnectFourApp:
     def run(self):
         """Start the application."""
         while True:
-            entry = self.interface.start()
-            if entry[0].lower() == 'q':
+            self.interface.show_start()
+            choice = self.interface.want_to_play()
+            if choice[0].lower() == 'q':
                 self.interface.close()
                 break
             else:
-                player = int(entry) - 1
+                player = int(choice) - 1
                 agent = MCTSAgent()
                 self.play_games(player, agent)
 
     def play_games(self, player, agent):
         """Play games between player and agent."""
+        self.interface.show_board()
         while True:
             self.env.reset()
             total_rewards = np.zeros(self.env.players)
             while not self.env.done:
-                self.interface.show_board(self.env.state)
+                self.interface.update_board(self.env.state)
                 if self.env.turn == player:
                     action = self.interface.get_action()
                     if action[0].lower() == 'q':
@@ -120,22 +122,29 @@ class ConnectFourApp:
                     action = agent.act(self.env)
                 _, rewards, _, _ = self.env.step(action)
                 total_rewards += rewards
-            winner = np.argmax(total_rewards)
-            self.interface.show_board(self.env.state)
-            self.interface.show_winner(winner)
+            self.interface.update_board(self.env.state)
+            self.interface.show_winner(np.argmax(total_rewards))
+            choice = self.interface.want_to_replay()
+            if choice[0].lower() == 'q':
+                return
 
 
 class TextInterface:
     """Text interface for playing Connect Four."""
 
-    def start(self):
+    def show_start(self):
         print("Welcome to Connect Four.")
-        return input("Choose player (1 or 2) or quit: ")
+
+    def want_to_play(self):
+        return input("Choose player (1) or (2) or (Q)uit: ")
 
     def get_action(self):
-        return input("Choose a column or restart or quit: ")
+        return input("Choose a column or (R)estart or (Q)uit: ")
+    
+    def show_board(self):
+        pass
 
-    def show_board(self, board):
+    def update_board(self, board):
         board = np.where(board == 0, "_", np.where(board == 1, "X", "O"))
         print()
         for row in board:
@@ -144,7 +153,10 @@ class TextInterface:
         print(" " + " ".join(str(x) for x in range(1, 8)) + " ")
 
     def show_winner(self, winner):
-        print("Player {0} wins".format(winner + 1))
+        print("\nPlayer {0} wins".format(winner + 1))
+        
+    def want_to_replay(self):
+        return input("Choose (R)estart or (Q)uit: ")
 
     def close(self):
         print("\nThanks for playing!")
@@ -254,7 +266,7 @@ class GraphicInterface:
     def __init__(self):
         self.win = GraphWin("Connect Four", 400, 575)
         self.win.setBackground("green3")
-        self.banner = Text(Point(200, 50), "Connect Four")
+        self.banner = Text(Point(200, 50), "")
         self.banner.setSize(25)
         self.banner.setFill("yellow2")
         self.banner.setStyle("bold")
@@ -277,26 +289,33 @@ class GraphicInterface:
         ]
         self.board = BoardView(self.win, Point(200, 250))
 
-    def start(self):
+    def show_start(self):
+        for b in self.action_buttons:
+            b.undraw()
+        self.board.undraw()
+        self.banner.setText("Connect Four")
         for b in self.start_buttons:
             b.draw(self.win)
+    
+    def want_to_play(self):
+        for b in self.start_buttons:
             b.activate()
-        clicked = False
-        while not clicked:
+        while True:
             p = self.win.getMouse()
             for b in self.start_buttons:
                 if b.clicked(p):
                     label = b.getLabel()
-                    clicked = True
-                    break
-        if label != 'Quit':
-            label = label[-1]
-            for b in self.start_buttons:
-                b.undraw()
-            for b in self.action_buttons:
-                b.draw(self.win)
-            self.board.draw(self.win)
-        return label
+                    if label != 'Quit':
+                        label = label[-1]
+                    return label
+
+    def show_board(self):
+        for b in self.start_buttons:
+            b.undraw()
+        self.banner.setText("")
+        for b in self.action_buttons:
+            b.draw(self.win)
+        self.board.draw(self.win)
 
     def get_action(self):
         for b in self.action_buttons:
@@ -306,12 +325,21 @@ class GraphicInterface:
             for b in self.action_buttons:
                 if b.clicked(p):
                     return b.getLabel()
-
-    def show_board(self, board):
+        
+    def update_board(self, board):
         self.board.update(board)
 
     def show_winner(self, winner):
-        self.banner.setText("Player {} wins!".format(winner+1))
+        self.banner.setText("Player {} wins!".format(winner + 1))
+        
+    def want_to_replay(self):
+        for b in self.action_buttons:
+            b.activate()
+        while True:
+            p = self.win.getMouse()
+            for b in self.action_buttons:
+                if b.clicked(p):
+                    return b.getLabel()
 
     def close(self):
         self.win.close()
