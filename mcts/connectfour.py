@@ -123,7 +123,10 @@ class ConnectFourApp:
                 _, rewards, _, _ = self.env.step(action)
                 total_rewards += rewards
             self.interface.update_board(self.env.state)
-            self.interface.show_winner(np.argmax(total_rewards))
+            if total_rewards[0]==0:
+                self.interface.show_winner(0)
+            else:
+                self.interface.show_winner(np.argmax(total_rewards)+1)
             choice = self.interface.want_to_replay()
             if choice[0].lower() == 'q':
                 return
@@ -153,7 +156,7 @@ class TextInterface:
         print(" " + " ".join(str(x) for x in range(1, 8)) + " ")
 
     def show_winner(self, winner):
-        print("\nPlayer {0} wins".format(winner + 1))
+        print("\nPlayer {0} wins".format(winner))
         
     def want_to_replay(self):
         return input("Choose (R)estart or (Q)uit: ")
@@ -333,7 +336,10 @@ class GraphicInterface:
         self.banner.setText("")
 
     def show_winner(self, winner):
-        self.banner.setText("Player {} wins!".format(winner + 1))
+        if winner==0:
+                self.banner.setText("Its a tie!")
+        else:
+            self.banner.setText("Player {} wins!".format(winner))
         
     def want_to_replay(self):
         for b in self.action_buttons:
