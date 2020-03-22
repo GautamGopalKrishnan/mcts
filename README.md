@@ -1,6 +1,16 @@
 # mcts
 Monte Carlo tree search applied to tic-tac-toe and connect-four.
 
+## Playing Tic-Tac-Toe
+Install by cloning the repository with
+
+    git clone https://github.com/GautamGopalKrishnan/mcts.git
+
+Run a game with
+
+    python tictactoe_run.py
+
+
 ## Playing Connect Four
 Install by cloning the repository with
 
