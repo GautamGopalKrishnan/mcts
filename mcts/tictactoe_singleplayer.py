@@ -8,78 +8,57 @@ import numpy as np
 
 
 class TicTacToeEnv:
-    """An environment for two-player tic-tac-toe."""
-
-    def __init__(self):
-        self.players = 2
-        self.reset()
+    """An environment for one-player tic-tac-toe."""
+    
+    def __init__(self, state=np.zeros((3, 3), dtype=np.int)):
+        self.state = state
+        self.players=1
 
     def reset(self):
-        """Initialize a new game."""
-        self.board = np.zeros((3, 3), dtype=np.int)
-        self.turn = 0
-        self.done = False
-        self.actions = [(a, b) for a in range(3) for b in range(3)]
+        self.state = np.zeros((3, 3), dtype=np.int)
+        self.done=False
+        self.turn=0
 
     def step(self, action):
-        """Perform action and return new state, rewards, done, and turn."""
-        assert self.board[action] == 0
-        self.board[action] = (-1) ** self.turn
-        self.turn = (self.turn + 1) % 2
-        winner = self.winner(action)
-        if winner is not None:
-            rewards = np.array([winner,(-1)*winner])
-        else:
-            rewards = np.array([0, 0])
-        self.done = winner is not None or np.all(self.board != 0)
-        if self.done:
-            self.actions = []
-        else:
-            self.actions = [(a, b) for a in range(3) for b in range(3) if self.board[a, b] == 0]
-        return self.board.copy(), rewards, self.done, self.turn
+        assert self.state[action] != 1
+        self.state[action] = 1
+        self.done=self.donef(action)
+        return self.state.copy(), -1, self.done, {}
 
     def copy(self):
         copy = TicTacToeEnv()
-        copy.board = self.board.copy()
-        copy.turn = self.turn
-        copy.done = self.done
-        copy.actions = self.actions.copy()
+        copy.state = self.state.copy()
+        copy.done=self.done
+        copy.turn=self.turn
         return copy
-
+    
     def render(self):
-        print(self.board)
+        print(self.state)
 
-    def winner(self,action):
-        (r,c)=(self.rsum(action[0]),self.csum(action[1]))
-        if r==3 or r==-3:
-            return np.sign(r)
-        if c==3 or c==-3:
-            return np.sign(c)
-        if (action[0]==action[1]):
-            d=self.dsum()
-            if d==3 or d==-3:
-                return np.sign(d)
-        if (sum(action)==2):
-            a=self.adsum()
-            if a==3 or a==-3:
-                return np.sign(a)
-        return None
+    def donef(self,action=()):
+        """True if three in a row somewhere."""
+        if (action[0]==action[1] and self.dsum()==3) or (sum(action)==2 and self.adsum()==3):
+            return True
+        if self.rsum(action[0])==3 or self.csum(action[1])==3:
+            return True
+        return False
     
     def rsum(self,r=0):
-        return np.sum(self.board[r, :])
+        return np.sum(self.state[r, :])
     
     def csum(self,c=0):
-        return np.sum(self.board[:, c])
+        return np.sum(self.state[:, c])
     
     def dsum(self):
-        return np.sum(self.board[np.arange(3), np.arange(3)])
+        return np.sum(self.state[np.arange(3), np.arange(3)])
         
     def adsum(self):
-        return np.sum(self.board[np.arange(3), np.arange(2, -1, -1)])
-
-    def __eq__(self, other):
-        return np.array_equal(self.board, other.board)
+        return np.sum(self.state[np.arange(3), np.arange(2, -1, -1)])
     
+    @property
+    def actions(self):
+        """The available actions for the current state."""
+        return [(a, b) for a in range(3) for b in range(3) if self.state[a, b] != 1]    
     
     
 class TicTacToeApp:
@@ -98,37 +77,19 @@ class TicTacToeApp:
                 self.interface.close()
                 break
             else:
-                player = int(choice) - 1
                 agent = MCTSAgent()
-                self.play_games(player, agent)
+                self.play_games(agent)
 
-    def play_games(self, player, agent):
+    def play_games(self, agent):
         """Play games between player and agent."""
         self.interface.show_board()
         while True:
             self.env.reset()
-            total_rewards = np.zeros(self.env.players)
             while not self.env.done:
-                self.interface.update_board(self.env.board)
-                if self.env.turn == player:
-                    action = self.interface.get_action()
-                    if action[0].lower() == 'q':
-                        return
-                    elif action[0].lower() == 'r':
-                        self.env.reset()
-                        total_rewards = np.zeros(self.env.players)
-                        continue
-                    else:
-                        action = (int(action)//3,int(action)%3)
-                else:
-                    action = agent.act(self.env)
+                self.interface.update_board(self.env.state)
+                action = agent.act(self.env)
                 _, rewards, _, _ = self.env.step(action)
-                total_rewards += rewards
-            self.interface.update_board(self.env.board)
-            if total_rewards[0]==0:
-                self.interface.show_winner(0)
-            else:
-                self.interface.show_winner(np.argmax(total_rewards)+1)
+            self.interface.update_board(self.env.state)
             choice = self.interface.want_to_replay()
             if choice[0].lower() == 'q':
                 return
@@ -230,9 +191,6 @@ class BoardView:
         self.pieces = [[self._make_piece(Point(100 * (col+1), (100*(row+1))+50), 50)
                         for col in range(3)]
                        for row in range(3)]
-        self.circles=[[Circle(Point(100 * (col+1), (100*(row+1))+50), 25)
-                        for col in range(3)]
-                       for row in range(3)]
         self.crosses=[[(Line(Point((100*(col+1))-25, 100*(row+1)+25), Point((100*(col+1))+25, 100*(row+1)+75)),Line(Point((100*(col+1))-25, 100*(row+1)+75), Point((100*(col+1))+25, 100*(row+1)+25)))
                         for col in range(3)]
                        for row in range(3)]
@@ -252,7 +210,6 @@ class BoardView:
         for row in range(3):
             for col in range(3):
                 self.pieces[row][col].undraw()
-                self.circles[row][col].undraw()
                 self.crosses[row][col][0].undraw()
                 self.crosses[row][col][1].undraw()
 
@@ -260,13 +217,8 @@ class BoardView:
         """Draw board state on this widget."""
         for row in range(3):
             for col in range(3):
-                if board[row, col] == -1:
-                    self.circles[row][col].undraw()
-                    self.circles[row][col].draw(self.win)
-                    #self.pieces[row][col].setFill(self.piece_colors[0])
-                elif board[row, col] == 0:
+                if board[row, col] == 0:
                     self.pieces[row][col].setFill(self.background_color)
-                    self.circles[row][col].undraw()
                     self.crosses[row][col][0].undraw()
                     self.crosses[row][col][1].undraw()
                 elif board[row, col] == 1:
@@ -274,10 +226,9 @@ class BoardView:
                     self.crosses[row][col][1].undraw()
                     self.crosses[row][col][0].draw(self.win)
                     self.crosses[row][col][1].draw(self.win)
-                    #self.pieces[row][col].setFill(self.piece_colors[1])
 
 
-class GraphicInterface2:
+class GraphicInterface1:
     
     def __init__(self):
         self.win = GraphWin("Tic Tac Toe", 400, 575)
@@ -288,20 +239,10 @@ class GraphicInterface2:
         self.banner.setStyle("bold")
         self.banner.draw(self.win)
         self.start_buttons = [
-            Button(self.win, Point(200, 275), 150, 50, "Player 1"),
-            Button(self.win, Point(200, 350), 150, 50, "Player 2"),
+            Button(self.win, Point(200, 275), 150, 50, "New Game"),
             Button(self.win, Point(200, 425), 150, 50, "Quit"),
         ]
         self.action_buttons = [
-            Button(self.win, Point(100, 150), 100, 100, "0"),
-            Button(self.win, Point(200, 150), 100, 100, "1"),
-            Button(self.win, Point(300, 150), 100, 100, "2"),
-            Button(self.win, Point(100, 250), 100, 100, "3"),
-            Button(self.win, Point(200, 250), 100, 100, "4"),
-            Button(self.win, Point(300, 250), 100, 100, "5"),
-            Button(self.win, Point(100, 350), 100, 100, "6"),
-            Button(self.win, Point(200, 350), 100, 100, "7"),
-            Button(self.win, Point(300, 350), 100, 100, "8"),
             Button(self.win, Point(100, 525), 150, 50, "Restart"),
             Button(self.win, Point(300, 525), 150, 50, "Quit"),
         ]
@@ -323,8 +264,6 @@ class GraphicInterface2:
             for b in self.start_buttons:
                 if b.clicked(p):
                     label = b.getLabel()
-                    if label != 'Quit':
-                        label = label[-1]
                     return label
 
     def show_board(self):
@@ -334,27 +273,10 @@ class GraphicInterface2:
         for b in self.action_buttons:
             b.draw(self.win)
         self.board.draw(self.win)
-
-    def get_action(self):
-        self.banner.setText("Your turn")
-        for b in self.action_buttons:
-            b.activate()
-        while True:
-            p = self.win.getMouse()
-            for b in self.action_buttons:
-                if b.clicked(p):
-                    self.banner.setText("")
-                    return b.getLabel()
         
     def update_board(self, board):
         self.board.update(board)
         self.banner.setText("")
-
-    def show_winner(self, winner):
-        if winner==0:
-                self.banner.setText("Its a tie!")
-        else:
-            self.banner.setText("Player {} wins!".format(winner))
         
     def want_to_replay(self):
         for b in self.action_buttons:
