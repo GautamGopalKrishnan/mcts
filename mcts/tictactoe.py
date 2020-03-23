@@ -1,7 +1,7 @@
 """Basic Tic-Tac-Toe game."""
 
 from .agents import MCTSAgent
-from .graphics import GraphWin, Text, Point, Rectangle, Circle
+from .graphics import GraphWin, Text, Point, Rectangle, Circle, Line
 
 
 import numpy as np
@@ -230,6 +230,12 @@ class BoardView:
         self.pieces = [[self._make_piece(Point(100 * (col+1), (100*(row+1))+50), 50)
                         for col in range(3)]
                        for row in range(3)]
+        self.circles=[[Circle(Point(100 * (col+1), (100*(row+1))+50), 20)
+                        for col in range(3)]
+                       for row in range(3)]
+        self.crosses=[[(Line(Point((100*(col+1))-25, 100*(row+1)+25), Point((100*(col+1))+25, 100*(row+1)+75)),Line(Point((100*(col+1))-25, 100*(row+1)+75), Point((100*(col+1))+25, 100*(row+1)+25)))
+                        for col in range(3)]
+                       for row in range(3)]
         
     def _make_piece(self, center, size):
         """Set up the grid of pieces."""
@@ -246,17 +252,30 @@ class BoardView:
         for row in range(3):
             for col in range(3):
                 self.pieces[row][col].undraw()
+                self.circles[row][col].undraw()
+                self.crosses[row][col][0].undraw()
+                self.crosses[row][col][1].undraw()
 
     def update(self, board):
         """Draw board state on this widget."""
         for row in range(3):
             for col in range(3):
                 if board[row, col] == -1:
-                    self.pieces[row][col].setFill(self.piece_colors[0])
+                    self.circles[row][col].undraw()
+                    self.circles[row][col].draw(self.win)
+                    #self.pieces[row][col].setFill(self.piece_colors[0])
                 elif board[row, col] == 0:
                     self.pieces[row][col].setFill(self.background_color)
+                    self.circles[row][col].undraw()
+                    self.crosses[row][col][0].undraw()
+                    self.crosses[row][col][1].undraw()
                 elif board[row, col] == 1:
-                    self.pieces[row][col].setFill(self.piece_colors[1])
+                    self.crosses[row][col][0].undraw()
+                    self.crosses[row][col][1].undraw()
+                    self.crosses[row][col][0].draw(self.win)
+                    self.crosses[row][col][1].draw(self.win)
+                    #Line(Point((100*(col+1))-25, 100*(row+1)+75), Point((100*(col+1))+25, 100*(row+1)+25)).draw(self.win)
+                    #self.pieces[row][col].setFill(self.piece_colors[1])
 
 
 class GraphicInterface2:
