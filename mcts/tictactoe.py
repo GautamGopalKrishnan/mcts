@@ -111,7 +111,7 @@ class TicTacToeApp:
             while not self.env.done:
                 self.interface.update_board(self.env.board)
                 if self.env.turn == player:
-                    action = self.interface.get_action()
+                    action = self.interface.get_action(self.env.actions)
                     if action[0].lower() == 'q':
                         return
                     elif action[0].lower() == 'r':
@@ -335,10 +335,18 @@ class GraphicInterface2:
             b.draw(self.win)
         self.board.draw(self.win)
 
-    def get_action(self):
+    def get_action(self, actions):
         self.banner.setText("Your turn")
-        for b in self.action_buttons:
-            b.activate()
+        for i in range(3):
+            for j in range(3):
+                if (i,j) in actions:
+                    self.action_buttons[3*i + j].activate()
+                else:
+                    self.action_buttons[3*i + j].deactivate()
+        self.action_buttons[9].activate()
+        self.action_buttons[10].activate()
+        #for b in self.action_buttons:
+        #    b.activate()
         while True:
             p = self.win.getMouse()
             for b in self.action_buttons:

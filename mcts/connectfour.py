@@ -109,7 +109,7 @@ class ConnectFourApp:
             while not self.env.done:
                 self.interface.update_board(self.env.state)
                 if self.env.turn == player:
-                    action = self.interface.get_action()
+                    action = self.interface.get_action(self.env.actions)
                     if action[0].lower() == 'q':
                         return
                     elif action[0].lower() == 'r':
@@ -320,10 +320,17 @@ class GraphicInterface:
             b.draw(self.win)
         self.board.draw(self.win)
 
-    def get_action(self):
+    def get_action(self, actions):
         self.banner.setText("Your turn")
-        for b in self.action_buttons:
-            b.activate()
+        for i in range(7):
+            if i in actions:
+                self.action_buttons[i].activate()
+            else:
+                self.action_buttons[i].deactivate()
+        self.action_buttons[7].activate()
+        self.action_buttons[8].activate()
+        #for b in self.action_buttons:
+        #    b.activate()
         while True:
             p = self.win.getMouse()
             for b in self.action_buttons:
