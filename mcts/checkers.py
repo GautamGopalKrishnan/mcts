@@ -144,15 +144,17 @@ class CheckersApp:
                 self.interface.update_board(self.env.state)
                 if self.env.turn == player:
                     action=[]
-                    action.append(self.interface.get_action1(self.env.actions))
-                    if action[0][0].lower() == 'q':
+                    a=self.interface.get_action1(self.env.actions).replace('(', '').replace(')', '').split(',')
+                    if a[0].lower() == 'q':
                         return
-                    elif action[0][0].lower() == 'r':
+                    elif a[0].lower() == 'r':
                         self.env.reset()
                         total_rewards = np.zeros(self.env.players)
                         continue
                     else:
-                        action.append(self.interface.get_action2(self.env.actions,action[0]))
+                        action.append((int(a[0]),int(a[1])))
+                        b=self.interface.get_action2(self.env.actions,action[0]).replace('(', '').replace(')', '').split(',')
+                        action.append((int(b[0]),int(b[1])))
                 else:
                     action = agent.act(self.env)
                 _, rewards, _, _ = self.env.step(action)
@@ -227,8 +229,6 @@ class BoardView:
         self.background_color = "white"
         self.frame_colors = ['white','brown']
         self.piece_colors = ['black', 'red']
-        #self.rect = Rectangle(Point(100, 100),Point(380, 380))
-        #self.rect.setFill(self.frame_color)
         self.pieces = [[self._make_piece(Point(50+col*45,100+row*45), 45, (row+col)%2)
                         for col in range(8)]
                        for row in range(8)]
@@ -244,13 +244,11 @@ class BoardView:
         return piece
     
     def draw(self, win):
-        #self.rect.draw(win)
         for row in range(8):
             for col in range(8):
                 self.pieces[row][col].draw(win)
 
     def undraw(self):
-        #self.rect.undraw()
         for row in range(8):
             for col in range(8):
                 self.pieces[row][col].undraw()
@@ -288,7 +286,7 @@ class GraphicInterface:
             Button(self.win, Point(200, 350), 150, 50, "Player 2"),
             Button(self.win, Point(200, 425), 150, 50, "Quit"),
         ]
-        self.action_buttons = [Button(self.win, Point(50+j*45,100+i*45), 45, 45, "{}{}".format(i,j)) for i in range(8) for j in range(8)]
+        self.action_buttons = [Button(self.win, Point(50+j*45,100+i*45), 45, 45, "({},{})".format(i,j)) for i in range(8) for j in range(8)]
         self.action_buttons.append(Button(self.win, Point(100, 525), 150, 50, "Restart"))
         self.action_buttons.append(Button(self.win, Point(300, 525), 150, 50, "Quit"))
         self.board = BoardView(self.win, Point(200, 250))
@@ -342,9 +340,9 @@ class GraphicInterface:
         for i in range(8):
             for j in range(8):
                 self.action_buttons[8*i+j].deactivate()
-        for r in actions:
-            if r[0]==firstaction:
-                self.action_buttons[8*r[1][0]+r[1][1]].activate()                
+        for r in range(len(actions)):
+            if actions[r][0][0]==firstaction[0] and actions[r][0][1]==firstaction[1]:
+                self.action_buttons[8*actions[r][1][0]+actions[r][1][1]].activate()                
         #self.action_buttons[-1].activate()
         #self.action_buttons[-2].activate()
         while True:
