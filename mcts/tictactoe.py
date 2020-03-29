@@ -1,7 +1,8 @@
-"""Basic Tic-Tac-Toe game."""
+"""A Tic-Tac-Toe game."""
 
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle, Line
+from .gui import Button
 
 
 import numpy as np
@@ -134,7 +135,7 @@ class TicTacToeApp:
                 return
 
 
-class TextInterface2:
+class TicTacToeTUI:
     """Text interface for playing Tic-Tac-Toe."""
 
     def show_start(self):
@@ -167,75 +168,26 @@ class TextInterface2:
         print("\nThanks for playing!")
 
 
-class Button:
-    """A button is a labeled rectangle in a window.
-    It is activated or deactivate with the activate()
-    and deactivate() methods. The clicked(p) method
-    returns true if the button is active and p is inside it.
-    
-    From "Python Programming: An Introduction to Computer Science"
-    by John Zelle."""
-    
-    def __init__(self, win, center, width, height, label):
-        w, h = width/2.0, height/2.0
-        x, y = center.getX(), center.getY()
-        self.xmax, self.xmin = x + w, x - w
-        self.ymax, self.ymin = y + h, y - h
-        p1 = Point(self.xmin, self.ymin)
-        p2 = Point(self.xmax, self.ymax)
-        self.rect = Rectangle(p1, p2)
-        self.rect.setFill('lightgray')
-        self.label = Text(center, label)
-        self.deactivate()
-
-    def draw(self, win):
-        self.rect.draw(win)
-        self.label.draw(win)
-
-    def undraw(self):
-        self.rect.undraw()
-        self.label.undraw()
-
-    def clicked(self, p):
-        """Returns true if button active and p is inside."""
-        return (self.active and
-                self.xmin <= p.getX() <= self.xmax and
-                self.ymin <= p.getY() <= self.ymax)
-    
-    def getLabel(self):
-        """Returns the label string of this button."""
-        return self.label.getText()
-    
-    def activate(self):
-        """Sets this button to 'active'."""
-        self.label.setFill('black')
-        self.rect.setWidth(2)
-        self.active = True
-        
-    def deactivate(self):
-        """Sets this button to 'inactive'."""
-        self.label.setFill('darkgrey')
-        self.rect.setWidth(1)
-        self.active = False
-
-
-class BoardView:
-    """Widget for a Tic-Tac-Toe board."""
+class TicTacToeBoard:
+    """Graphical widget for a Tic-Tac-Toe board."""
     
     def __init__(self, win, center):
-        self.win = win
+        self.window = win
         self.background_color = "white"
         self.frame_color = 'white'
         self.piece_colors = ['yellow', 'red']
         self.pieces = [[self._make_piece(Point(100 * (col+1), (100*(row+1))+50), 50)
                         for col in range(3)]
                        for row in range(3)]
-        self.circles=[[Circle(Point(100 * (col+1), (100*(row+1))+50), 25)
-                        for col in range(3)]
-                       for row in range(3)]
-        self.crosses=[[(Line(Point((100*(col+1))-25, 100*(row+1)+25), Point((100*(col+1))+25, 100*(row+1)+75)),Line(Point((100*(col+1))-25, 100*(row+1)+75), Point((100*(col+1))+25, 100*(row+1)+25)))
-                        for col in range(3)]
-                       for row in range(3)]
+        self.circles = [[Circle(Point(100 * (col+1), (100*(row+1))+50), 25)
+                         for col in range(3)]
+                        for row in range(3)]
+        self.crosses = [[(Line(Point((100*(col+1))-25, 100*(row+1)+25),
+                               Point((100*(col+1))+25, 100*(row+1)+75)),
+                          Line(Point((100*(col+1))-25, 100*(row+1)+75),
+                               Point((100*(col+1))+25, 100*(row+1)+25)))
+                         for col in range(3)]
+                        for row in range(3)]
         
     def _make_piece(self, center, size):
         """Set up the grid of pieces."""
@@ -262,8 +214,7 @@ class BoardView:
             for col in range(3):
                 if board[row, col] == -1:
                     self.circles[row][col].undraw()
-                    self.circles[row][col].draw(self.win)
-                    #self.pieces[row][col].setFill(self.piece_colors[0])
+                    self.circles[row][col].draw(self.window)
                 elif board[row, col] == 0:
                     self.pieces[row][col].setFill(self.background_color)
                     self.circles[row][col].undraw()
@@ -272,40 +223,39 @@ class BoardView:
                 elif board[row, col] == 1:
                     self.crosses[row][col][0].undraw()
                     self.crosses[row][col][1].undraw()
-                    self.crosses[row][col][0].draw(self.win)
-                    self.crosses[row][col][1].draw(self.win)
-                    #self.pieces[row][col].setFill(self.piece_colors[1])
+                    self.crosses[row][col][0].draw(self.window)
+                    self.crosses[row][col][1].draw(self.window)
 
 
-class GraphicInterface2:
-    
-    def __init__(self):
-        self.win = GraphWin("Tic Tac Toe", 400, 575)
-        self.win.setBackground("white")
+class TicTacToeGUI:
+
+    def __init__(self, window):
+        self.window = window
+        self.window.setBackground("white")
         self.banner = Text(Point(200, 50), "")
         self.banner.setSize(25)
         self.banner.setFill("black")
         self.banner.setStyle("bold")
-        self.banner.draw(self.win)
+        self.banner.draw(self.window)
         self.start_buttons = [
-            Button(self.win, Point(200, 275), 150, 50, "Player 1"),
-            Button(self.win, Point(200, 350), 150, 50, "Player 2"),
-            Button(self.win, Point(200, 425), 150, 50, "Quit"),
+            Button(self.window, Point(200, 275), 150, 50, "Player 1"),
+            Button(self.window, Point(200, 350), 150, 50, "Player 2"),
+            Button(self.window, Point(200, 425), 150, 50, "Quit"),
         ]
         self.action_buttons = [
-            Button(self.win, Point(100, 150), 100, 100, "0"),
-            Button(self.win, Point(200, 150), 100, 100, "1"),
-            Button(self.win, Point(300, 150), 100, 100, "2"),
-            Button(self.win, Point(100, 250), 100, 100, "3"),
-            Button(self.win, Point(200, 250), 100, 100, "4"),
-            Button(self.win, Point(300, 250), 100, 100, "5"),
-            Button(self.win, Point(100, 350), 100, 100, "6"),
-            Button(self.win, Point(200, 350), 100, 100, "7"),
-            Button(self.win, Point(300, 350), 100, 100, "8"),
-            Button(self.win, Point(100, 525), 150, 50, "Restart"),
-            Button(self.win, Point(300, 525), 150, 50, "Quit"),
+            Button(self.window, Point(100, 150), 100, 100, "0"),
+            Button(self.window, Point(200, 150), 100, 100, "1"),
+            Button(self.window, Point(300, 150), 100, 100, "2"),
+            Button(self.window, Point(100, 250), 100, 100, "3"),
+            Button(self.window, Point(200, 250), 100, 100, "4"),
+            Button(self.window, Point(300, 250), 100, 100, "5"),
+            Button(self.window, Point(100, 350), 100, 100, "6"),
+            Button(self.window, Point(200, 350), 100, 100, "7"),
+            Button(self.window, Point(300, 350), 100, 100, "8"),
+            Button(self.window, Point(100, 525), 150, 50, "Restart"),
+            Button(self.window, Point(300, 525), 150, 50, "Quit"),
         ]
-        self.board = BoardView(self.win, Point(200, 250))
+        self.board = TicTacToeBoard(self.window, Point(200, 250))
 
     def show_start(self):
         for b in self.action_buttons:
@@ -313,13 +263,13 @@ class GraphicInterface2:
         self.board.undraw()
         self.banner.setText("Tic Tac Toe")
         for b in self.start_buttons:
-            b.draw(self.win)
+            b.draw(self.window)
     
     def want_to_play(self):
         for b in self.start_buttons:
             b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.start_buttons:
                 if b.clicked(p):
                     label = b.getLabel()
@@ -332,23 +282,21 @@ class GraphicInterface2:
             b.undraw()
         self.banner.setText("")
         for b in self.action_buttons:
-            b.draw(self.win)
-        self.board.draw(self.win)
+            b.draw(self.window)
+        self.board.draw(self.window)
 
     def get_action(self, actions):
         self.banner.setText("Your turn")
         for i in range(3):
             for j in range(3):
-                if (i,j) in actions:
+                if (i, j) in actions:
                     self.action_buttons[3*i + j].activate()
                 else:
                     self.action_buttons[3*i + j].deactivate()
         self.action_buttons[9].activate()
         self.action_buttons[10].activate()
-        #for b in self.action_buttons:
-        #    b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     self.banner.setText("")
@@ -359,8 +307,8 @@ class GraphicInterface2:
         self.banner.setText("")
 
     def show_winner(self, winner):
-        if winner==0:
-                self.banner.setText("Its a tie!")
+        if winner == 0:
+            self.banner.setText("It's a tie!")
         else:
             self.banner.setText("Player {} wins!".format(winner))
         
@@ -368,11 +316,12 @@ class GraphicInterface2:
         for b in self.action_buttons:
             b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     return b.getLabel()
 
     def close(self):
-        self.win.close()
-
+        self.banner.undraw()
+        for b in self.start_buttons:
+            b.undraw()

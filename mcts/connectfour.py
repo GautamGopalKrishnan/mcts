@@ -1,7 +1,8 @@
-"""A Connect Four game"""
+"""A Connect Four game."""
 
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle
+from .gui import Button
 
 import numpy as np
 
@@ -14,68 +15,68 @@ class ConnectFourEnv:
         self.reset()
 
     def reset(self):
-        """Initialize a new game and return state and turn."""
-        self.state = np.zeros((6, 7), dtype=np.int)
+        """Initialize a new game."""
+        self.board = np.zeros((6, 7), dtype=np.int)
         self.done = False
         self.actions = list(range(7))
         self.turn = 0
 
     def step(self, action):
-        """Perform action and return new state, rewards, done, and turn."""
-        move=(max([i for i in range(6) if self.state[i,action]==0]),action)
-        assert self.state[move] == 0
-        self.state[move] = (-1) ** self.turn
+        """Perform action and return new board, rewards, done, and turn."""
+        move=(max([i for i in range(6) if self.board[i,action]==0]),action)
+        assert self.board[move] == 0
+        self.board[move] = (-1) ** self.turn
         winner = self.winner(move)
         if winner is not None:
             rewards = np.array([winner,(-1)*winner])
         else:
             rewards = np.array([0,0])
-        self.done = winner is not None or np.all(self.state != 0)
+        self.done = winner is not None or np.all(self.board != 0)
         self.turn = (self.turn + 1) % 2
         if self.done:
             self.actions = []
         else:
-            self.actions = [i for i in range(7) if self.state[0,i]==0]
-        return self.state.copy(), rewards, self.done, self.turn
+            self.actions = [i for i in range(7) if self.board[0,i]==0]
+        return self.board.copy(), rewards, self.done, self.turn
 
     def copy(self):
         copy = ConnectFourEnv()
-        copy.state = self.state.copy()
+        copy.board = self.board.copy()
         copy.turn = self.turn
         copy.done = self.done
         copy.actions = self.actions.copy()
         return copy
 
     def render(self):
-        print(self.state)
+        print(self.board)
 
     def winner(self,move):
         if (self.rcheck(move),self.ccheck(move),self.dcheck(move),self.acheck(move))!=(0,0,0,0):
-            return np.sign(self.state[move])
+            return np.sign(self.board[move])
         return None
         
     def rcheck(self,move):
         for i in range(4):
-            if np.sum(self.state[move[0]][i:i+4])==4*self.state[move]:
+            if np.sum(self.board[move[0]][i:i+4])==4*self.board[move]:
                 return 1
         return 0    
             
     def ccheck(self,move):
-        if np.sum(self.state[move[0]:min(move[0]+4,6),move[1]])==4*self.state[move]:
+        if np.sum(self.board[move[0]:min(move[0]+4,6),move[1]])==4*self.board[move]:
             return 1
         return 0
     
     def dcheck(self,move):
-        l=self.state.copy().diagonal(move[1]-move[0])
+        l=self.board.copy().diagonal(move[1]-move[0])
         for i in range(len(l)-3):
-            if np.sum(l[i:i+4])==4*self.state[move]:
+            if np.sum(l[i:i+4])==4*self.board[move]:
                 return 1
         return 0
     
     def acheck(self,move):
-        l=self.state.copy()[::-1,:].diagonal(move[1]+move[0]-5)
+        l=self.board.copy()[::-1,:].diagonal(move[1]+move[0]-5)
         for i in range(len(l)-3):
-            if np.sum(l[i:i+4])==4*self.state[move]:
+            if np.sum(l[i:i+4])==4*self.board[move]:
                 return 1
         return 0
 
@@ -107,7 +108,7 @@ class ConnectFourApp:
             self.env.reset()
             total_rewards = np.zeros(self.env.players)
             while not self.env.done:
-                self.interface.update_board(self.env.state)
+                self.interface.update_board(self.env.board)
                 if self.env.turn == player:
                     action = self.interface.get_action(self.env.actions)
                     if action[0].lower() == 'q':
@@ -122,7 +123,7 @@ class ConnectFourApp:
                     action = agent.act(self.env)
                 _, rewards, _, _ = self.env.step(action)
                 total_rewards += rewards
-            self.interface.update_board(self.env.state)
+            self.interface.update_board(self.env.board)
             if total_rewards[0]==0:
                 self.interface.show_winner(0)
             else:
@@ -132,7 +133,7 @@ class ConnectFourApp:
                 return
 
 
-class TextInterface:
+class ConnectFourTUI:
     """Text interface for playing Connect Four."""
 
     def show_start(self):
@@ -156,7 +157,10 @@ class TextInterface:
         print(" " + " ".join(str(x) for x in range(1, 8)) + " ")
 
     def show_winner(self, winner):
-        print("\nPlayer {0} wins".format(winner))
+        if winner == 0:
+            print("It's a tie!")
+        else:
+            print("\nPlayer {0} wins".format(winner))
         
     def want_to_replay(self):
         return input("Choose (R)estart or (Q)uit: ")
@@ -165,63 +169,11 @@ class TextInterface:
         print("\nThanks for playing!")
 
 
-class Button:
-    """A button is a labeled rectangle in a window.
-    It is activated or deactivate with the activate()
-    and deactivate() methods. The clicked(p) method
-    returns true if the button is active and p is inside it.
-    
-    From "Python Programming: An Introduction to Computer Science"
-    by John Zelle."""
-    
-    def __init__(self, win, center, width, height, label):
-        w, h = width/2.0, height/2.0
-        x, y = center.getX(), center.getY()
-        self.xmax, self.xmin = x + w, x - w
-        self.ymax, self.ymin = y + h, y - h
-        p1 = Point(self.xmin, self.ymin)
-        p2 = Point(self.xmax, self.ymax)
-        self.rect = Rectangle(p1, p2)
-        self.rect.setFill('lightgray')
-        self.label = Text(center, label)
-        self.deactivate()
-
-    def draw(self, win):
-        self.rect.draw(win)
-        self.label.draw(win)
-
-    def undraw(self):
-        self.rect.undraw()
-        self.label.undraw()
-
-    def clicked(self, p):
-        """Returns true if button active and p is inside."""
-        return (self.active and
-                self.xmin <= p.getX() <= self.xmax and
-                self.ymin <= p.getY() <= self.ymax)
-    
-    def getLabel(self):
-        """Returns the label string of this button."""
-        return self.label.getText()
-    
-    def activate(self):
-        """Sets this button to 'active'."""
-        self.label.setFill('black')
-        self.rect.setWidth(2)
-        self.active = True
-        
-    def deactivate(self):
-        """Sets this button to 'inactive'."""
-        self.label.setFill('darkgrey')
-        self.rect.setWidth(1)
-        self.active = False
-
-
-class BoardView:
-    """Widget for a Connect Four board."""
+class ConnectFourBoard:
+    """Graphical widget for a Connect Four board."""
     
     def __init__(self, win, center):
-        self.win = win
+        self.window = win
         self.background_color = "white"
         self.frame_color = 'blue'
         self.piece_colors = ['yellow', 'red']
@@ -264,33 +216,33 @@ class BoardView:
                     self.pieces[row][col].setFill(self.piece_colors[1])
 
 
-class GraphicInterface:
+class ConnectFourGUI:
     
-    def __init__(self):
-        self.win = GraphWin("Connect Four", 400, 575)
-        self.win.setBackground("white")
+    def __init__(self, window):
+        self.window = window
+        self.window.setBackground("white")
         self.banner = Text(Point(200, 50), "")
         self.banner.setSize(25)
         self.banner.setFill("black")
         self.banner.setStyle("bold")
-        self.banner.draw(self.win)
+        self.banner.draw(self.window)
         self.start_buttons = [
-            Button(self.win, Point(200, 275), 150, 50, "Player 1"),
-            Button(self.win, Point(200, 350), 150, 50, "Player 2"),
-            Button(self.win, Point(200, 425), 150, 50, "Quit"),
+            Button(self.window, Point(200, 275), 150, 50, "Player 1"),
+            Button(self.window, Point(200, 350), 150, 50, "Player 2"),
+            Button(self.window, Point(200, 425), 150, 50, "Quit"),
         ]
         self.action_buttons = [
-            Button(self.win, Point(50, 450), 50, 50, "1"),
-            Button(self.win, Point(100, 450), 50, 50, "2"),
-            Button(self.win, Point(150, 450), 50, 50, "3"),
-            Button(self.win, Point(200, 450), 50, 50, "4"),
-            Button(self.win, Point(250, 450), 50, 50, "5"),
-            Button(self.win, Point(300, 450), 50, 50, "6"),
-            Button(self.win, Point(350, 450), 50, 50, "7"),
-            Button(self.win, Point(100, 525), 150, 50, "Restart"),
-            Button(self.win, Point(300, 525), 150, 50, "Quit"),
+            Button(self.window, Point(50, 450), 50, 50, "1"),
+            Button(self.window, Point(100, 450), 50, 50, "2"),
+            Button(self.window, Point(150, 450), 50, 50, "3"),
+            Button(self.window, Point(200, 450), 50, 50, "4"),
+            Button(self.window, Point(250, 450), 50, 50, "5"),
+            Button(self.window, Point(300, 450), 50, 50, "6"),
+            Button(self.window, Point(350, 450), 50, 50, "7"),
+            Button(self.window, Point(100, 525), 150, 50, "Restart"),
+            Button(self.window, Point(300, 525), 150, 50, "Quit"),
         ]
-        self.board = BoardView(self.win, Point(200, 250))
+        self.board = ConnectFourBoard(self.window, Point(200, 250))
 
     def show_start(self):
         for b in self.action_buttons:
@@ -298,13 +250,13 @@ class GraphicInterface:
         self.board.undraw()
         self.banner.setText("Connect Four")
         for b in self.start_buttons:
-            b.draw(self.win)
+            b.draw(self.window)
     
     def want_to_play(self):
         for b in self.start_buttons:
             b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.start_buttons:
                 if b.clicked(p):
                     label = b.getLabel()
@@ -317,8 +269,8 @@ class GraphicInterface:
             b.undraw()
         self.banner.setText("")
         for b in self.action_buttons:
-            b.draw(self.win)
-        self.board.draw(self.win)
+            b.draw(self.window)
+        self.board.draw(self.window)
 
     def get_action(self, actions):
         self.banner.setText("Your turn")
@@ -329,10 +281,8 @@ class GraphicInterface:
                 self.action_buttons[i].deactivate()
         self.action_buttons[7].activate()
         self.action_buttons[8].activate()
-        #for b in self.action_buttons:
-        #    b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     self.banner.setText("")
@@ -343,8 +293,8 @@ class GraphicInterface:
         self.banner.setText("")
 
     def show_winner(self, winner):
-        if winner==0:
-                self.banner.setText("Its a tie!")
+        if winner == 0:
+            self.banner.setText("It's a tie!")
         else:
             self.banner.setText("Player {} wins!".format(winner))
         
@@ -352,10 +302,12 @@ class GraphicInterface:
         for b in self.action_buttons:
             b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     return b.getLabel()
 
     def close(self):
-        self.win.close()
+        self.banner.undraw()
+        for b in self.start_buttons:
+            b.undraw()
