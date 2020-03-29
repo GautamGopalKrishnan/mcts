@@ -1,9 +1,9 @@
 """Implementation of agents."""
 
-import numpy as np
-import random
-import time
 from collections import deque
+import time
+import random
+import numpy as np
 
 
 class RandomAgent:
@@ -11,15 +11,6 @@ class RandomAgent:
 
     def act(self, env):
         return random.choice(env.actions)
-
-
-class HumanAgent:
-    """An agent controlled by a human player's input."""
-
-    def act(self, env):
-        #indices = input('Input action: ').replace('(', '').replace(')', '').split(',')
-        return int(input('Input action: '))
-        #return tuple(int(x) for x in indices)
 
 
 def epsilon_greedy(epsilon=0.05):
@@ -90,7 +81,7 @@ class MCTSAgent:
             value = self.simulate(leaf)
             self.backup(leaf, value)
         return max(self.root.children, key=lambda node: node.visits).action
-    
+
     def expand(self, node):
         """Return an unvisited or terminal leaf node following the tree policy.
 
@@ -119,7 +110,7 @@ class MCTSAgent:
 
     def backup(self, node, value):
         """Backup the return from a rollout from node."""
-        while node != None:
+        while node is not None:
             value += node.reward
             node.visits += 1
             node.value = (node.visits - 1)/node.visits * node.value + value/node.visits

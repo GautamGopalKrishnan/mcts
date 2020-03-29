@@ -9,7 +9,7 @@ from mcts.tictactoe import TicTacToeApp, TicTacToeGUI
 
 class GraphicalInterface:
     """Top-level graphical interface."""
-    
+
     def __init__(self):
         self.window = GraphWin("MCTS Games", 400, 575)
         self.banner = Text(Point(200, 50), "Select Game")
@@ -21,8 +21,9 @@ class GraphicalInterface:
             Button(self.window, Point(200, 350), 150, 50, "Connect Four"),
             Button(self.window, Point(200, 425), 150, 50, "Quit"),
         ]
-        
+
     def run(self):
+        """Run the main application."""
         while True:
             choice = self.choose_game()
             if choice == "Tic Tac Toe":
@@ -36,6 +37,7 @@ class GraphicalInterface:
                 break
 
     def choose_game(self):
+        """Return the user selected game."""
         self.banner.draw(self.window)
         for b in self.buttons:
             b.draw(self.window)
@@ -47,6 +49,7 @@ class GraphicalInterface:
                     return b.getLabel()
 
     def run_game(self, app):
+        """Run the given game app in this window."""
         self.banner.undraw()
         for b in self.buttons:
             b.undraw()

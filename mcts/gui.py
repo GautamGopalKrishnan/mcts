@@ -8,10 +8,10 @@ class Button:
     It is activated or deactivate with the activate()
     and deactivate() methods. The clicked(p) method
     returns true if the button is active and p is inside it.
-    
+
     From "Python Programming: An Introduction to Computer Science"
     by John Zelle."""
-    
+
     def __init__(self, win, center, width, height, label):
         w, h = width/2.0, height/2.0
         x, y = center.getX(), center.getY()
@@ -37,17 +37,17 @@ class Button:
         return (self.active and
                 self.xmin <= p.getX() <= self.xmax and
                 self.ymin <= p.getY() <= self.ymax)
-    
+
     def getLabel(self):
         """Returns the label string of this button."""
         return self.label.getText()
-    
+
     def activate(self):
         """Sets this button to 'active'."""
         self.label.setFill('black')
         self.rect.setWidth(2)
         self.active = True
-        
+
     def deactivate(self):
         """Sets this button to 'inactive'."""
         self.label.setFill('darkgrey')

@@ -1,10 +1,10 @@
 """A Connect Four game."""
 
+import numpy as np
+
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle
 from .gui import Button
-
-import numpy as np
 
 
 class ConnectFourEnv:
@@ -23,20 +23,20 @@ class ConnectFourEnv:
 
     def step(self, action):
         """Perform action and return new board, rewards, done, and turn."""
-        move=(max([i for i in range(6) if self.board[i,action]==0]),action)
+        move = (max([i for i in range(6) if self.board[i, action] == 0]), action)
         assert self.board[move] == 0
         self.board[move] = (-1) ** self.turn
         winner = self.winner(move)
         if winner is not None:
-            rewards = np.array([winner,(-1)*winner])
+            rewards = np.array([winner, (-1) * winner])
         else:
-            rewards = np.array([0,0])
+            rewards = np.array([0, 0])
         self.done = winner is not None or np.all(self.board != 0)
         self.turn = (self.turn + 1) % 2
         if self.done:
             self.actions = []
         else:
-            self.actions = [i for i in range(7) if self.board[0,i]==0]
+            self.actions = [i for i in range(7) if self.board[0, i] == 0]
         return self.board.copy(), rewards, self.done, self.turn
 
     def copy(self):
@@ -50,33 +50,33 @@ class ConnectFourEnv:
     def render(self):
         print(self.board)
 
-    def winner(self,move):
-        if (self.rcheck(move),self.ccheck(move),self.dcheck(move),self.acheck(move))!=(0,0,0,0):
+    def winner(self, move):
+        if (self.rcheck(move), self.ccheck(move), self.dcheck(move), self.acheck(move)) != (0, 0, 0, 0):
             return np.sign(self.board[move])
         return None
-        
-    def rcheck(self,move):
+
+    def rcheck(self, move):
         for i in range(4):
-            if np.sum(self.board[move[0]][i:i+4])==4*self.board[move]:
+            if np.sum(self.board[move[0]][i:i+4]) == 4 * self.board[move]:
                 return 1
-        return 0    
-            
-    def ccheck(self,move):
-        if np.sum(self.board[move[0]:min(move[0]+4,6),move[1]])==4*self.board[move]:
+        return 0
+
+    def ccheck(self, move):
+        if np.sum(self.board[move[0]:min(move[0] + 4, 6), move[1]]) == 4 * self.board[move]:
             return 1
         return 0
-    
-    def dcheck(self,move):
-        l=self.board.copy().diagonal(move[1]-move[0])
-        for i in range(len(l)-3):
-            if np.sum(l[i:i+4])==4*self.board[move]:
+
+    def dcheck(self, move):
+        l = self.board.copy().diagonal(move[1] - move[0])
+        for i in range(len(l) - 3):
+            if np.sum(l[i:i+4]) == 4 * self.board[move]:
                 return 1
         return 0
-    
-    def acheck(self,move):
-        l=self.board.copy()[::-1,:].diagonal(move[1]+move[0]-5)
-        for i in range(len(l)-3):
-            if np.sum(l[i:i+4])==4*self.board[move]:
+
+    def acheck(self, move):
+        l = self.board.copy()[::-1, :].diagonal(move[1] + move[0] - 5)
+        for i in range(len(l) - 3):
+            if np.sum(l[i:i+4]) == 4 * self.board[move]:
                 return 1
         return 0
 
@@ -96,10 +96,9 @@ class ConnectFourApp:
             if choice[0].lower() == 'q':
                 self.interface.close()
                 break
-            else:
-                player = int(choice) - 1
-                agent = MCTSAgent()
-                self.play_games(player, agent)
+            player = int(choice) - 1
+            agent = MCTSAgent()
+            self.play_games(player, agent)
 
     def play_games(self, player, agent):
         """Play games between player and agent."""
@@ -124,10 +123,10 @@ class ConnectFourApp:
                 _, rewards, _, _ = self.env.step(action)
                 total_rewards += rewards
             self.interface.update_board(self.env.board)
-            if total_rewards[0]==0:
+            if total_rewards[0] == 0:
                 self.interface.show_winner(0)
             else:
-                self.interface.show_winner(np.argmax(total_rewards)+1)
+                self.interface.show_winner(np.argmax(total_rewards) + 1)
             choice = self.interface.want_to_replay()
             if choice[0].lower() == 'q':
                 return
@@ -144,7 +143,7 @@ class ConnectFourTUI:
 
     def get_action(self):
         return input("Choose a column or (R)estart or (Q)uit: ")
-    
+
     def show_board(self):
         pass
 
@@ -161,7 +160,7 @@ class ConnectFourTUI:
             print("It's a tie!")
         else:
             print("\nPlayer {0} wins".format(winner))
-        
+
     def want_to_replay(self):
         return input("Choose (R)estart or (Q)uit: ")
 
@@ -171,7 +170,7 @@ class ConnectFourTUI:
 
 class ConnectFourBoard:
     """Graphical widget for a Connect Four board."""
-    
+
     def __init__(self, win, center):
         self.window = win
         self.background_color = "white"
@@ -184,14 +183,14 @@ class ConnectFourBoard:
         self.pieces = [[self._make_piece(Point(50 + 50 * col, 125 + 50 * row), 50)
                         for col in range(7)]
                        for row in range(6)]
-        
+
     def _make_piece(self, center, size):
         """Set up the grid of pieces."""
         piece = Circle(center, size / 2 - 1)
         piece.setFill(self.background_color)
         piece.setOutline(self.frame_color)
         return piece
-    
+
     def draw(self, win):
         self.rect.draw(win)
         for row in range(6):
@@ -217,7 +216,8 @@ class ConnectFourBoard:
 
 
 class ConnectFourGUI:
-    
+    """Graphical interface for playing Connect Four."""
+
     def __init__(self, window):
         self.window = window
         self.window.setBackground("white")
@@ -251,7 +251,7 @@ class ConnectFourGUI:
         self.banner.setText("Connect Four")
         for b in self.start_buttons:
             b.draw(self.window)
-    
+
     def want_to_play(self):
         for b in self.start_buttons:
             b.activate()
@@ -287,7 +287,7 @@ class ConnectFourGUI:
                 if b.clicked(p):
                     self.banner.setText("")
                     return b.getLabel()
-        
+
     def update_board(self, board):
         self.board.update(board)
         self.banner.setText("")
@@ -297,7 +297,7 @@ class ConnectFourGUI:
             self.banner.setText("It's a tie!")
         else:
             self.banner.setText("Player {} wins!".format(winner))
-        
+
     def want_to_replay(self):
         for b in self.action_buttons:
             b.activate()
