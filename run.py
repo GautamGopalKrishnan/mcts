@@ -5,6 +5,7 @@ from mcts.connectfour import ConnectFourApp, ConnectFourGUI
 from mcts.graphics import GraphWin, Point, Text
 from mcts.gui import Button
 from mcts.tictactoe import TicTacToeApp, TicTacToeGUI
+from mcts.checkers import CheckersApp, CheckersGUI
 
 
 class GraphicalInterface:
@@ -17,8 +18,9 @@ class GraphicalInterface:
         self.banner.setFill("black")
         self.banner.setStyle("bold")
         self.buttons = [
-            Button(self.window, Point(200, 275), 150, 50, "Tic Tac Toe"),
-            Button(self.window, Point(200, 350), 150, 50, "Connect Four"),
+            Button(self.window, Point(200, 200), 150, 50, "Tic Tac Toe"),
+            Button(self.window, Point(200, 275), 150, 50, "Connect Four"),
+            Button(self.window, Point(200, 350), 150, 50, "Checkers"),
             Button(self.window, Point(200, 425), 150, 50, "Quit"),
         ]
 
@@ -31,6 +33,9 @@ class GraphicalInterface:
                 self.run_game(app)
             elif choice == "Connect Four":
                 app = ConnectFourApp(ConnectFourGUI(self.window))
+                self.run_game(app)
+            elif choice == "Checkers":
+                app = CheckersApp(CheckersGUI(self.window))
                 self.run_game(app)
             else:
                 self.window.close()

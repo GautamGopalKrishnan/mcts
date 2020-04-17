@@ -1,9 +1,10 @@
 """A Checkers game"""
 
+import numpy as np
+
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle
-
-import numpy as np
+from .gui import Button
 
 
 class CheckersEnv:
@@ -24,16 +25,13 @@ class CheckersEnv:
                 if (i+j)%2!=0:
                     if i<3:
                         self.state[i,j]=1
+                    if i==2:
+                        moves=(self.bdiag(i,j),self.badiag(i,j),self.fdiag(i,j),self.fadiag(i,j))
+                        for r in range(4):
+                            if moves[r] is not None:
+                                self.actions.append(moves[r])
                     if i>4:
                         self.state[i,j]=-1
-                    if i==2 and j<7:
-                        self.actions.append(((i,j),(i+1,j-1)))
-                        self.actions.append(((i,j),(i+1,j+1)))
-                    if i==5 and j!=0:
-                        self.actions.append(((i,j),(i-1,j+1)))
-                        self.actions.append(((i,j),(i-1,j-1)))
-        self.actions.append(((2,7),(3,6)))
-        self.actions.append(((5,0),(4,1)))
 
     def step(self, action):
         """Perform action and return new state, rewards, done, and turn."""
@@ -43,57 +41,67 @@ class CheckersEnv:
         if action[1][0]==0 or action[1][0]==7:
             self.state[action[1]] = 2*np.sign(self.state[action[0]])
         self.state[action[0]] = 0
-        x=action[0][0]
-        y=action[0][1]
-        a=action[1][0]
-        b=action[1][1]
-        l=len(self.actions)
-        r=0
-        while r<l:
-            if self.actions[r][1]==action[1] or self.actions[r][0]==action[0]:
-                self.actions.pop(r)
-                l=l-1
-                r=r-1
-            elif np.abs(self.actions[r][0][0]-self.actions[r][1][0])==2 and np.abs(self.actions[r][0][1]-self.actions[r][1][1])==2 and self.actions[r][0][0]+self.actions[r][1][0]==2*x and self.actions[r][0][1]+self.actions[r][1][1]==2*y:
-                self.actions.pop(r)
-                l=l-1
-                r=r-1
-            r=r+1
-        if x>0 and y>0 and self.state[x-1,y-1]!=-1 and self.state[x-1,y-1]!=0:
-            self.actions.append(((x-1,y-1),(x,y)))
-        if x>0 and y<7 and self.state[x-1,y+1]!=-1 and self.state[x-1,y+1]!=0:
-            self.actions.append(((x-1,y+1),(x,y)))    
-        if x<7 and y>0 and self.state[x+1,y-1]!=1 and self.state[x+1,y-1]!=0:
-            self.actions.append(((x+1,y-1),(x,y)))     
-        if x<7 and y<7 and self.state[x+1,y+1]!=1 and self.state[x+1,y+1]!=0:
-            self.actions.append(((x+1,y+1),(x,y)))   
-        if x>1 and y>1 and self.state[x-2,y-2]!=-1 and self.state[x-2,y-2]!=0 and np.sign(self.state[x-1,y-1])==(-1)*np.sign(self.state[x-2,y-2]):
-            self.actions.append(((x-2,y-2),(x,y)))
-        if x>1 and y<6 and self.state[x-2,y+2]!=-1 and self.state[x-2,y+2]!=0 and np.sign(self.state[x-1,y+1])==(-1)*np.sign(self.state[x-2,y+2]):
-            self.actions.append(((x-2,y+2),(x,y)))
-        if x<6 and y>1 and self.state[x+2,y-2]!=1 and self.state[x+2,y-2]!=0 and np.sign(self.state[x+1,y-1])==(-1)*np.sign(self.state[x+2,y-2]):
-            self.actions.append(((x+2,y-2),(x,y)))
-        if x<6 and y<6 and self.state[x+2,y+2]!=1 and self.state[x+2,y+2]!=0 and np.sign(self.state[x+1,y+1])==(-1)*np.sign(self.state[x+2,y+2]):
-            self.actions.append(((x+2,y+2),(x,y)))
-        if a>0 and a<7 and b>0 and b<7:
-            if np.sign(self.state[a-1,b-1])==(-1)*np.sign(self.state[a,b]) and self.state[a+1,b+1]==0 and self.state[a-1,b-1]!=-1:
-                self.actions.append(((a-1,b-1),(a+1,b+1)))
-            if np.sign(self.state[a-1,b+1])==(-1)*np.sign(self.state[a,b]) and self.state[a+1,b-1]==0 and self.state[a-1,b+1]!=-1:
-                self.actions.append(((a-1,b+1),(a+1,b-1)))
-            if np.sign(self.state[a+1,b-1])==(-1)*np.sign(self.state[a,b]) and self.state[a-1,b+1]==0 and self.state[a+1,b-1]!=1:
-                self.actions.append(((a+1,b-1),(a-1,b+1)))
-            if np.sign(self.state[a+1,b+1])==(-1)*np.sign(self.state[a,b]) and self.state[a-1,b-1]==0 and self.state[a+1,b+1]!=1:
-                self.actions.append(((a+1,b+1),(a-1,b-1)))
+        self.turn = (self.turn + 1)%2
+        self.actions=[]
+        for i in range(8):
+            for j in range(8):
+                if np.sign(self.state[i,j])==(-1)**self.turn:
+                    moves=(self.bdiag(i,j),self.badiag(i,j),self.fdiag(i,j),self.fadiag(i,j))
+                    for r in range(4):
+                        if moves[r] is not None:
+                            self.actions.append(moves[r])
         winner = self.winner(action)
         if winner is not None:
             rewards = np.array([winner,(-1)*winner])
         else:
             rewards = np.array([0,0])
         self.done = winner is not None
-        self.turn = (self.turn + 1)%2
-        if self.done:
-            self.actions=[]
         return self.state.copy(), rewards, self.done, self.turn
+    
+    def winner(self,action):
+        if len(self.actions)==0:
+            return (-1)**(self.turn+1)
+        return None 
+    
+    def bdiag(self, row, col):
+        if self.state[row,col]==1:
+            return None
+        else:
+            if row>0 and col>0 and self.state[row-1,col-1]==0:
+                return ((row,col),(row-1,col-1))
+            if row>1 and col>1 and self.state[row-2,col-2]==0 and np.sign(self.state[row-1,col-1])==(-1)*np.sign(self.state[row,col]):
+                return ((row,col),(row-2,col-2))
+        return None
+    
+    def badiag(self, row, col):
+        if self.state[row,col]==1:
+            return None
+        else:
+            if row>0 and col<7 and self.state[row-1,col+1]==0:
+                return ((row,col),(row-1,col+1))
+            if row>1 and col<6 and self.state[row-2,col+2]==0 and np.sign(self.state[row-1,col+1])==(-1)*np.sign(self.state[row,col]):
+                return ((row,col),(row-2,col+2))
+        return None
+    
+    def fdiag(self, row, col):
+        if self.state[row,col]==-1:
+            return None
+        else:
+            if row<7 and col<7 and self.state[row+1,col+1]==0:
+                return ((row,col),(row+1,col+1))
+            if row<6 and col<6 and self.state[row+2,col+2]==0 and np.sign(self.state[row+1,col+1])==(-1)*np.sign(self.state[row,col]):
+                return ((row,col),(row+2,col+2))
+        return None
+    
+    def fadiag(self, row, col):
+        if self.state[row,col]==-1:
+            return None
+        else:
+            if row<7 and col>0 and self.state[row+1,col-1]==0:
+                return ((row,col),(row+1,col-1))
+            if row<6 and col>1 and self.state[row+2,col-2]==0 and np.sign(self.state[row+1,col-1])==(-1)*np.sign(self.state[row,col]):
+                return ((row,col),(row+2,col-2))
+        return None
 
     def copy(self):
         copy = CheckersEnv()
@@ -105,14 +113,6 @@ class CheckersEnv:
 
     def render(self):
         print(self.state)
-
-    def winner(self,action):
-        n = (-1)*np.sign(self.state[action[1]])
-        for r in range(len(self.actions)):
-            if np.sign(self.state[self.actions[r][0]])==n:
-                return None
-        return (-1)*n
-
 
 class CheckersApp:
     """Application for running a game of Checkers."""
@@ -143,7 +143,6 @@ class CheckersApp:
             while not self.env.done:
                 self.interface.update_board(self.env.state)
                 if self.env.turn == player:
-                    action=[]
                     a=self.interface.get_action1(self.env.actions).replace('(', '').replace(')', '').split(',')
                     if a[0].lower() == 'q':
                         return
@@ -152,9 +151,10 @@ class CheckersApp:
                         total_rewards = np.zeros(self.env.players)
                         continue
                     else:
-                        action.append((int(a[0]),int(a[1])))
-                        b=self.interface.get_action2(self.env.actions,action[0]).replace('(', '').replace(')', '').split(',')
-                        action.append((int(b[0]),int(b[1])))
+                        a=(int(a[0]),int(a[1]))
+                        b=self.interface.get_action2(self.env.actions,a).replace('(', '').replace(')', '').split(',')
+                        b=(int(b[0]),int(b[1]))
+                        action=(a,b)
                 else:
                     action = agent.act(self.env)
                 _, rewards, _, _ = self.env.step(action)
@@ -168,67 +168,14 @@ class CheckersApp:
             if choice[0].lower() == 'q':
                 return
 
-
-class Button:
-    """A button is a labeled rectangle in a window.
-    It is activated or deactivate with the activate()
-    and deactivate() methods. The clicked(p) method
-    returns true if the button is active and p is inside it.
-    
-    From "Python Programming: An Introduction to Computer Science"
-    by John Zelle."""
-    
-    def __init__(self, win, center, width, height, label):
-        w, h = width/2.0, height/2.0
-        x, y = center.getX(), center.getY()
-        self.xmax, self.xmin = x + w, x - w
-        self.ymax, self.ymin = y + h, y - h
-        p1 = Point(self.xmin, self.ymin)
-        p2 = Point(self.xmax, self.ymax)
-        self.rect = Rectangle(p1, p2)
-        self.rect.setFill('lightgray')
-        self.label = Text(center, label)
-        self.deactivate()
-
-    def draw(self, win):
-        self.rect.draw(win)
-        self.label.draw(win)
-
-    def undraw(self):
-        self.rect.undraw()
-        self.label.undraw()
-
-    def clicked(self, p):
-        """Returns true if button active and p is inside."""
-        return (self.active and
-                self.xmin <= p.getX() <= self.xmax and
-                self.ymin <= p.getY() <= self.ymax)
-    
-    def getLabel(self):
-        """Returns the label string of this button."""
-        return self.label.getText()
-    
-    def activate(self):
-        """Sets this button to 'active'."""
-        self.label.setFill('black')
-        self.rect.setWidth(2)
-        self.active = True
-        
-    def deactivate(self):
-        """Sets this button to 'inactive'."""
-        self.label.setFill('darkgrey')
-        self.rect.setWidth(1)
-        self.active = False
-
-
-class BoardView:
+class CheckersBoard:
     """Widget for a Checkers board."""
     
-    def __init__(self, win, center):#Needs fixing
+    def __init__(self, win, center):
         self.win = win
         self.background_color = "white"
         self.frame_colors = ['white','brown']
-        self.piece_colors = ['black', 'red']
+        self.piece_colors = ['black', 'red', 'gray', 'orange']
         self.pieces = [[self._make_piece(Point(50+col*45,100+row*45), 45, (row+col)%2)
                         for col in range(8)]
                        for row in range(8)]
@@ -262,6 +209,10 @@ class BoardView:
                     self.circles[row][col].undraw()
                     self.circles[row][col].draw(self.win)
                     self.circles[row][col].setFill(self.piece_colors[0])
+                elif board[row, col] == -2:
+                    self.circles[row][col].undraw()
+                    self.circles[row][col].draw(self.win)
+                    self.circles[row][col].setFill(self.piece_colors[2])
                 elif board[row, col] == 0:
                     self.circles[row][col].undraw()
                     self.pieces[row][col].setFill(self.frame_colors[(row+col)%2])
@@ -269,27 +220,32 @@ class BoardView:
                     self.circles[row][col].undraw()
                     self.circles[row][col].draw(self.win)
                     self.circles[row][col].setFill(self.piece_colors[1])
+                elif board[row, col] == 2:
+                    self.circles[row][col].undraw()
+                    self.circles[row][col].draw(self.win)
+                    self.circles[row][col].setFill(self.piece_colors[3])
 
 
-class GraphicInterface:
+class CheckersGUI:
     
-    def __init__(self):
-        self.win = GraphWin("Checkers", 400, 575)
-        self.win.setBackground("white")
+    def __init__(self, window):
+        #self.win = GraphWin("Checkers", 400, 575)
+        self.window=window
+        self.window.setBackground("white")
         self.banner = Text(Point(200, 50), "")
         self.banner.setSize(25)
         self.banner.setFill("black")
         self.banner.setStyle("bold")
-        self.banner.draw(self.win)
+        self.banner.draw(self.window)
         self.start_buttons = [
-            Button(self.win, Point(200, 275), 150, 50, "Player 1"),
-            Button(self.win, Point(200, 350), 150, 50, "Player 2"),
-            Button(self.win, Point(200, 425), 150, 50, "Quit"),
+            Button(self.window, Point(200, 275), 150, 50, "Player 1"),
+            Button(self.window, Point(200, 350), 150, 50, "Player 2"),
+            Button(self.window, Point(200, 425), 150, 50, "Quit"),
         ]
-        self.action_buttons = [Button(self.win, Point(50+j*45,100+i*45), 45, 45, "({},{})".format(i,j)) for i in range(8) for j in range(8)]
-        self.action_buttons.append(Button(self.win, Point(100, 525), 150, 50, "Restart"))
-        self.action_buttons.append(Button(self.win, Point(300, 525), 150, 50, "Quit"))
-        self.board = BoardView(self.win, Point(200, 250))
+        self.action_buttons = [Button(self.window, Point(50+j*45,100+i*45), 45, 45, "({},{})".format(i,j)) for i in range(8) for j in range(8)]
+        self.action_buttons.append(Button(self.window, Point(100, 525), 150, 50, "Restart"))
+        self.action_buttons.append(Button(self.window, Point(300, 525), 150, 50, "Quit"))
+        self.board = CheckersBoard(self.window, Point(200, 250))
 
     def show_start(self):
         for b in self.action_buttons:
@@ -297,13 +253,13 @@ class GraphicInterface:
         self.board.undraw()
         self.banner.setText("Checkers")
         for b in self.start_buttons:
-            b.draw(self.win)
+            b.draw(self.window)
     
     def want_to_play(self):
         for b in self.start_buttons:
             b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.start_buttons:
                 if b.clicked(p):
                     label = b.getLabel()
@@ -316,8 +272,8 @@ class GraphicInterface:
             b.undraw()
         self.banner.setText("")
         for b in self.action_buttons:
-            b.draw(self.win)
-        self.board.draw(self.win)
+            b.draw(self.window)
+        self.board.draw(self.window)
 
     def get_action1(self, actions):
         self.banner.setText("Your turn")
@@ -329,7 +285,7 @@ class GraphicInterface:
         self.action_buttons[-1].activate()
         self.action_buttons[-2].activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     self.banner.setText("")
@@ -346,7 +302,7 @@ class GraphicInterface:
         #self.action_buttons[-1].activate()
         #self.action_buttons[-2].activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     self.banner.setText("")
@@ -367,10 +323,13 @@ class GraphicInterface:
         for b in self.action_buttons:
             b.activate()
         while True:
-            p = self.win.getMouse()
+            p = self.window.getMouse()
             for b in self.action_buttons:
                 if b.clicked(p):
                     return b.getLabel()
 
     def close(self):
-        self.win.close()
+        self.banner.undraw()
+        for b in self.start_buttons:
+            b.undraw()
+        #self.window.close()
