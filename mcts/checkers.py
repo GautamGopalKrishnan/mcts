@@ -15,8 +15,8 @@ class CheckersEnv:
         self.reset()
 
     def reset(self):
-        """Initialize a new game and return state and turn."""
-        self.state = np.zeros((8, 8), dtype=np.int)
+        """Initialize a new game and return board and turn."""
+        self.board = np.zeros((8, 8), dtype=np.int)
         self.done = False
         self.actions = []
         self.turn = 0
@@ -24,28 +24,28 @@ class CheckersEnv:
             for j in range(8):
                 if (i+j)%2!=0:
                     if i<3:
-                        self.state[i,j]=1
+                        self.board[i,j]=1
                     if i==2:
                         moves=(self.fdiag(i,j),self.fadiag(i,j))
                         for r in range(len(moves)):
                             if moves[r] is not None:
                                 self.actions.append(moves[r])
                     if i>4:
-                        self.state[i,j]=-1
+                        self.board[i,j]=-1
 
     def step(self, action):
-        """Perform action and return new state, rewards, done, and turn."""
+        """Perform action and return new board, rewards, done, and turn."""
         if np.abs(action[0][0]-action[1][0])==2:
-            self.state[(action[0][0]+action[1][0])//2,(action[0][1]+action[1][1])//2]=0
-        self.state[action[1]] = self.state[action[0]] 
+            self.board[(action[0][0]+action[1][0])//2,(action[0][1]+action[1][1])//2]=0
+        self.board[action[1]] = self.board[action[0]] 
         if action[1][0]==0 or action[1][0]==7:
-            self.state[action[1]] = 2*np.sign(self.state[action[0]])
-        self.state[action[0]] = 0
+            self.board[action[1]] = 2*np.sign(self.board[action[0]])
+        self.board[action[0]] = 0
         self.turn = (self.turn + 1)%2
         self.actions=[]
         for i in range(8):
             for j in range(8):
-                if np.sign(self.state[i,j])==(-1)**self.turn:
+                if np.sign(self.board[i,j])==(-1)**self.turn:
                     moves=(self.bdiag(i,j),self.badiag(i,j),self.fdiag(i,j),self.fadiag(i,j))
                     for r in range(4):
                         if moves[r] is not None:
@@ -56,7 +56,7 @@ class CheckersEnv:
         else:
             rewards = np.array([0,0])
         self.done = winner is not None
-        return self.state.copy(), rewards, self.done, self.turn
+        return self.board.copy(), rewards, self.done, self.turn
     
     def winner(self,action):
         if len(self.actions)==0:
@@ -64,50 +64,50 @@ class CheckersEnv:
         return None 
     
     def bdiag(self, row, col):
-        if self.state[row,col]!=1:
-            if row>0 and col>0 and self.state[row-1,col-1]==0:
+        if self.board[row,col]!=1:
+            if row>0 and col>0 and self.board[row-1,col-1]==0:
                 return ((row,col),(row-1,col-1))
-            if row>1 and col>1 and self.state[row-2,col-2]==0 and np.sign(self.state[row-1,col-1])==(-1)*np.sign(self.state[row,col]):
+            if row>1 and col>1 and self.board[row-2,col-2]==0 and np.sign(self.board[row-1,col-1])==(-1)*np.sign(self.board[row,col]):
                 return ((row,col),(row-2,col-2))
         return None
     
     def badiag(self, row, col):
-        if self.state[row,col]!=1:
-            if row>0 and col<7 and self.state[row-1,col+1]==0:
+        if self.board[row,col]!=1:
+            if row>0 and col<7 and self.board[row-1,col+1]==0:
                 return ((row,col),(row-1,col+1))
-            if row>1 and col<6 and self.state[row-2,col+2]==0 and np.sign(self.state[row-1,col+1])==(-1)*np.sign(self.state[row,col]):
+            if row>1 and col<6 and self.board[row-2,col+2]==0 and np.sign(self.board[row-1,col+1])==(-1)*np.sign(self.board[row,col]):
                 return ((row,col),(row-2,col+2))
         return None
     
     def fdiag(self, row, col):
-        if self.state[row,col]!=-1:
-            if row<7 and col<7 and self.state[row+1,col+1]==0:
+        if self.board[row,col]!=-1:
+            if row<7 and col<7 and self.board[row+1,col+1]==0:
                 return ((row,col),(row+1,col+1))
-            if row<6 and col<6 and self.state[row+2,col+2]==0 and np.sign(self.state[row+1,col+1])==(-1)*np.sign(self.state[row,col]):
+            if row<6 and col<6 and self.board[row+2,col+2]==0 and np.sign(self.board[row+1,col+1])==(-1)*np.sign(self.board[row,col]):
                 return ((row,col),(row+2,col+2))
         return None
     
     def fadiag(self, row, col):
-        if self.state[row,col]!=-1:
-            if row<7 and col>0 and self.state[row+1,col-1]==0:
+        if self.board[row,col]!=-1:
+            if row<7 and col>0 and self.board[row+1,col-1]==0:
                 return ((row,col),(row+1,col-1))
-            if row<6 and col>1 and self.state[row+2,col-2]==0 and np.sign(self.state[row+1,col-1])==(-1)*np.sign(self.state[row,col]):
+            if row<6 and col>1 and self.board[row+2,col-2]==0 and np.sign(self.board[row+1,col-1])==(-1)*np.sign(self.board[row,col]):
                 return ((row,col),(row+2,col-2))
         return None
 
     def copy(self):
         copy = CheckersEnv()
-        copy.state = self.state.copy()
+        copy.board = self.board.copy()
         copy.turn = self.turn
         copy.done = self.done
         copy.actions = self.actions.copy()
         return copy
 
     def render(self):
-        print(self.state)
+        print(self.board)
 
     def __eq__(self, other):
-        return np.array_equal(self.state, other.state) and self.turn==other.turn
+        return np.array_equal(self.board, other.board) and self.turn==other.turn
         
 class CheckersApp:
     """Application for running a game of Checkers."""
@@ -136,7 +136,7 @@ class CheckersApp:
             self.env.reset()
             total_rewards = np.zeros(self.env.players)
             while not self.env.done:
-                self.interface.update_board(self.env.state)
+                self.interface.update_board(self.env.board)
                 if self.env.turn == player:
                     a=self.interface.get_action1(self.env.actions)
                     if a[0].lower() == 'q':
@@ -155,7 +155,7 @@ class CheckersApp:
                     action = agent.act(self.env)
                 _, rewards, _, _ = self.env.step(action)
                 total_rewards += rewards
-            self.interface.update_board(self.env.state)
+            self.interface.update_board(self.env.board)
             if total_rewards[0]==0:
                 self.interface.show_winner(0)
             else:
