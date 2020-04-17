@@ -143,7 +143,7 @@ class CheckersApp:
             while not self.env.done:
                 self.interface.update_board(self.env.state)
                 if self.env.turn == player:
-                    a=self.interface.get_action1(self.env.actions).replace('(', '').replace(')', '').split(',')
+                    a=self.interface.get_action1(self.env.actions)
                     if a[0].lower() == 'q':
                         return
                     elif a[0].lower() == 'r':
@@ -151,6 +151,7 @@ class CheckersApp:
                         total_rewards = np.zeros(self.env.players)
                         continue
                     else:
+                        a=a.replace('(', '').replace(')', '').split(',')
                         a=(int(a[0]),int(a[1]))
                         b=self.interface.get_action2(self.env.actions,a).replace('(', '').replace(')', '').split(',')
                         b=(int(b[0]),int(b[1]))
@@ -229,7 +230,7 @@ class CheckersBoard:
 class CheckersGUI:
     
     def __init__(self, window):
-        #self.win = GraphWin("Checkers", 400, 575)
+        #self.window = GraphWin("Checkers", 400, 575)
         self.window=window
         self.window.setBackground("white")
         self.banner = Text(Point(200, 50), "")
