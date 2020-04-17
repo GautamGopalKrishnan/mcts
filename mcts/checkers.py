@@ -106,6 +106,9 @@ class CheckersEnv:
     def render(self):
         print(self.state)
 
+    def __eq__(self, other):
+        return np.array_equal(self.state, other.state) and self.turn==other.turn
+        
 class CheckersApp:
     """Application for running a game of Checkers."""
 

@@ -80,6 +80,9 @@ class ConnectFourEnv:
                 return 1
         return 0
 
+    def __eq__(self, other):
+        return np.array_equal(self.board, other.board)
+
 
 class ConnectFourApp:
     """Application for running a game of Connect Four."""
