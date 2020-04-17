@@ -26,8 +26,8 @@ class CheckersEnv:
                     if i<3:
                         self.state[i,j]=1
                     if i==2:
-                        moves=(self.bdiag(i,j),self.badiag(i,j),self.fdiag(i,j),self.fadiag(i,j))
-                        for r in range(4):
+                        moves=(self.fdiag(i,j),self.fadiag(i,j))
+                        for r in range(len(moves)):
                             if moves[r] is not None:
                                 self.actions.append(moves[r])
                     if i>4:
@@ -64,9 +64,7 @@ class CheckersEnv:
         return None 
     
     def bdiag(self, row, col):
-        if self.state[row,col]==1:
-            return None
-        else:
+        if self.state[row,col]!=1:
             if row>0 and col>0 and self.state[row-1,col-1]==0:
                 return ((row,col),(row-1,col-1))
             if row>1 and col>1 and self.state[row-2,col-2]==0 and np.sign(self.state[row-1,col-1])==(-1)*np.sign(self.state[row,col]):
@@ -74,9 +72,7 @@ class CheckersEnv:
         return None
     
     def badiag(self, row, col):
-        if self.state[row,col]==1:
-            return None
-        else:
+        if self.state[row,col]!=1:
             if row>0 and col<7 and self.state[row-1,col+1]==0:
                 return ((row,col),(row-1,col+1))
             if row>1 and col<6 and self.state[row-2,col+2]==0 and np.sign(self.state[row-1,col+1])==(-1)*np.sign(self.state[row,col]):
@@ -84,9 +80,7 @@ class CheckersEnv:
         return None
     
     def fdiag(self, row, col):
-        if self.state[row,col]==-1:
-            return None
-        else:
+        if self.state[row,col]!=-1:
             if row<7 and col<7 and self.state[row+1,col+1]==0:
                 return ((row,col),(row+1,col+1))
             if row<6 and col<6 and self.state[row+2,col+2]==0 and np.sign(self.state[row+1,col+1])==(-1)*np.sign(self.state[row,col]):
@@ -94,9 +88,7 @@ class CheckersEnv:
         return None
     
     def fadiag(self, row, col):
-        if self.state[row,col]==-1:
-            return None
-        else:
+        if self.state[row,col]!=-1:
             if row<7 and col>0 and self.state[row+1,col-1]==0:
                 return ((row,col),(row+1,col-1))
             if row<6 and col>1 and self.state[row+2,col-2]==0 and np.sign(self.state[row+1,col-1])==(-1)*np.sign(self.state[row,col]):
