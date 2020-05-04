@@ -2,12 +2,13 @@
 
 import numpy as np
 
+from .tic import CTicTacToeEnv
 from .agents import MCTSAgent
 from .graphics import Text, Point, Rectangle, Circle, Line
 from .gui import Button
 
 
-class TicTacToeEnv:
+class PyTicTacToeEnv:
     """An environment for two-player tic-tac-toe."""
 
     def __init__(self):
@@ -39,7 +40,7 @@ class TicTacToeEnv:
         return self.board.copy(), rewards, self.done, self.turn
 
     def copy(self):
-        copy = TicTacToeEnv()
+        copy = PyTicTacToeEnv()
         copy.board = self.board.copy()
         copy.turn = self.turn
         copy.done = self.done
@@ -84,8 +85,8 @@ class TicTacToeEnv:
 class TicTacToeApp:
     """Application for running a game of Tic-Tac-Toe."""
 
-    def __init__(self, interface):
-        self.env = TicTacToeEnv()
+    def __init__(self, interface, implementation="python"):
+        self.env = PyTicTacToeEnv() if implementation == "python" else CTicTacToeEnv()
         self.interface = interface
 
     def run(self):
