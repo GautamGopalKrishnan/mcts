@@ -7,7 +7,7 @@ import numpy as np
 
 cdef class CTicTacToeEnv:
     cdef TicTacToeEnv c_env
-    cdef int players
+    cdef public int players
 
     def __cinit__(self):
         self.c_env = TicTacToeEnv()

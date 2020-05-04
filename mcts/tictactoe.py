@@ -85,7 +85,7 @@ class PyTicTacToeEnv:
 class TicTacToeApp:
     """Application for running a game of Tic-Tac-Toe."""
 
-    def __init__(self, interface, implementation="python"):
+    def __init__(self, interface, implementation="c"):
         self.env = PyTicTacToeEnv() if implementation == "python" else CTicTacToeEnv()
         self.interface = interface
 
