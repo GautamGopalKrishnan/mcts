@@ -23,6 +23,15 @@ cdef class CTicTacToeEnv:
         state = np.array(self.c_env.board).reshape(3, 3)
         return state, np.array(reward), self.c_env.done, {}
 
+    def copy(self):
+        copy = CTicTacToeEnv()
+        copy.c_env = TicTacToeEnv(self.c_env)
+        return copy
+    
+    @property
+    def board(self):
+        return np.array(self.c_env.board).reshape(3, 3)
+
     @property
     def done(self):
         return self.c_env.done

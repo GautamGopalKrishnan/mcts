@@ -6,6 +6,7 @@ cdef extern from "_tictactoe.cpp":
 cdef extern from "_tictactoe.h":
     cdef cppclass TicTacToeEnv:
         TicTacToeEnv() except +
+        TicTacToeEnv(const TicTacToeEnv&)
         void reset()
         pair[float, float] step(int, int)
         bint done
