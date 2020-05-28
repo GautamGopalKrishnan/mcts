@@ -6,6 +6,10 @@ Install by cloning the repository with
 
     git clone https://github.com/GautamGopalKrishnan/mcts.git
 
+and building with
+
+    python setup.py build_ext -i
+
 ## Playing a Game
 Run the main application with
 
