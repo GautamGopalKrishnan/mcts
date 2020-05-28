@@ -42,5 +42,5 @@ cdef class CConnectFourEnv:
 
     @property
     def actions(self):
-        return [i for i in range(7) if self.c_env.board[0, i] == 0]
+        return [i for i in range(7) if self.c_env.board[i] == 0]
 

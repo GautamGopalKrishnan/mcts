@@ -88,8 +88,8 @@ class PyConnectFourEnv:
 class ConnectFourApp:
     """Application for running a game of Connect Four."""
 
-    def __init__(self, interface):
-        self.env = ConnectFourEnv()
+    def __init__(self, interface, implementation="c"):
+        self.env = PyConnectFourEnv() if implementation == "python" else CConnectFourEnv()
         self.interface = interface
 
     def run(self):

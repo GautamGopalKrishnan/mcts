@@ -16,9 +16,9 @@ void ConnectFourEnv::reset() {
   done = false;
 }
 
-std::pair<float, float> TicTacToeEnv::step(int col) {
+std::pair<float, float> ConnectFourEnv::step(int col) {
   int token = (turn == 0 ? 1 : -1);
-  int row=0
+  int row=0;
   for(int r=5;r>=0;r--)
   {
       if(board[7*r + col]==0)
@@ -82,7 +82,7 @@ std::pair<float, float> TicTacToeEnv::step(int col) {
   {
       if(row+col-r>=0 && row+col-r<=3)
       {
-          if(board[7*r+row+col-r]==token && board[7*(r-1)+row+col-r+1]==token && board[7*(r-2)+row+col-r+2]==token board[7*(r-3)+row+col-r+3]==token)
+          if(board[7*r+row+col-r]==token && board[7*(r-1)+row+col-r+1]==token && board[7*(r-2)+row+col-r+2]==token && board[7*(r-3)+row+col-r+3]==token)
           {
               done = true;
               if (turn == 0)
