@@ -2,12 +2,13 @@
 
 import numpy as np
 
+from .connect import CConnectFourEnv
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle
 from .gui import Button
 
 
-class ConnectFourEnv:
+class PyConnectFourEnv:
     """An environment for two-player connect-four."""
 
     def __init__(self):
