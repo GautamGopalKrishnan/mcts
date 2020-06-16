@@ -2,12 +2,13 @@
 
 import numpy as np
 
+from .connect import CCheckersEnv
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle
 from .gui import Button
 
 
-class CheckersEnv:
+class PyCheckersEnv:
     """An environment for two-player checkers."""
 
     def __init__(self):
@@ -112,8 +113,8 @@ class CheckersEnv:
 class CheckersApp:
     """Application for running a game of Checkers."""
 
-    def __init__(self, interface):
-        self.env = CheckersEnv()
+    def __init__(self, interface, implementation="c"):
+        self.env = PyCheckersEnv() if implementation == "python" else CCheckersEnv()
         self.interface = interface
 
     def run(self):

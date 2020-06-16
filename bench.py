@@ -2,6 +2,7 @@ import timeit
 
 setup = """
 
+from mcts.checkers import PyCheckersEnv, CCheckersEnv
 from mcts.connectfour import PyConnectFourEnv, CConnectFourEnv
 from mcts.tictactoe import PyTicTacToeEnv, CTicTacToeEnv
 
@@ -20,8 +21,8 @@ def simulate(env):
     return total_rewards
 
 
-env1 = PyConnectFourEnv()
-env2 = CConnectFourEnv()
+env1 = PyCheckersEnv()
+env2 = CCheckersEnv()
 
 """
 
