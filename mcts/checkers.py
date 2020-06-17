@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .connect import CCheckersEnv
+from .check import CCheckersEnv
 from .agents import MCTSAgent
 from .graphics import GraphWin, Text, Point, Rectangle, Circle
 from .gui import Button
