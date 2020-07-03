@@ -2,10 +2,10 @@
 
 import numpy as np
 
-from .check import CCheckersEnv
-from .agents import MCTSAgent
-from .graphics import GraphWin, Text, Point, Rectangle, Circle
-from .gui import Button
+from .wrapped import CCheckersEnv
+from ..agents import MCTSAgent
+from ..graphics import GraphWin, Text, Point, Rectangle, Circle
+from ..gui import Button
 
 
 class PyCheckersEnv:

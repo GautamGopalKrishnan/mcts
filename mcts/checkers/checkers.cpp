@@ -1,4 +1,4 @@
-#include "_checkers.h"
+#include "checkers.h"
 
 CheckersEnv::CheckersEnv() {
   turn = 0;

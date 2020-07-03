@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from _checkers cimport CheckersEnv
+from checkers cimport CheckersEnv
 
 import numpy as np
 

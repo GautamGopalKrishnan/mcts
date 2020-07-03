@@ -1,9 +1,9 @@
 from libcpp.utility cimport pair
 
-cdef extern from "_tictactoe.cpp":
+cdef extern from "tictactoe.cpp":
     pass
 
-cdef extern from "_tictactoe.h":
+cdef extern from "tictactoe.h":
     cdef cppclass TicTacToeEnv:
         TicTacToeEnv() except +
         TicTacToeEnv(const TicTacToeEnv&)

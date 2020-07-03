@@ -1,4 +1,4 @@
-#include "_tictactoe.h"
+#include "tictactoe.h"
 
 TicTacToeEnv::TicTacToeEnv() {
   turn = 0;

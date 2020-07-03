@@ -2,10 +2,10 @@ from libcpp.utility cimport pair
 from libcpp.vector cimport vector
 
 
-cdef extern from "_checkers.cpp":
+cdef extern from "checkers.cpp":
     pass
 
-cdef extern from "_checkers.h":
+cdef extern from "checkers.h":
     cdef cppclass CheckersEnv:
         CheckersEnv() except +
         CheckersEnv(const CheckersEnv&)

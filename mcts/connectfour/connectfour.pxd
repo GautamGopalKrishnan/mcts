@@ -1,9 +1,9 @@
 from libcpp.utility cimport pair
 
-cdef extern from "_connectfour.cpp":
+cdef extern from "connectfour.cpp":
     pass
 
-cdef extern from "_connectfour.h":
+cdef extern from "connectfour.h":
     cdef cppclass ConnectFourEnv:
         ConnectFourEnv() except +
         ConnectFourEnv(const ConnectFourEnv&)

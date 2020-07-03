@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from _connectfour cimport ConnectFourEnv
+from connectfour cimport ConnectFourEnv
 
 import numpy as np
 

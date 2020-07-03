@@ -1,4 +1,4 @@
-#include "_connectfour.h"
+#include "connectfour.h"
 
 ConnectFourEnv::ConnectFourEnv() {
   turn = 0;

@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from _tictactoe cimport TicTacToeEnv
+from tictactoe cimport TicTacToeEnv
 
 import numpy as np
 
