@@ -16,3 +16,19 @@ Run the main application with
     python run.py
 
 which will prompt you to select a game and choose a player.
+
+## Running Tests
+Basic checks of the package are performed with
+
+    python -m pytest
+
+## Building Documentation
+
+Documentation is built with Sphinx. To rebuild, run
+
+    sphinx-apidoc -f -o source/ ../mcts/
+    make html
+
+in the `docs/` directory. Then view the output with
+
+    open build/html/index.html
