@@ -20,14 +20,6 @@ mcts.checkers.wrapped module
    :undoc-members:
    :show-inheritance:
 
-mcts.checkers.wrapped module
-----------------------------
-
-.. automodule:: mcts.checkers.wrapped
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------

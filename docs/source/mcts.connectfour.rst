@@ -20,14 +20,6 @@ mcts.connectfour.wrapped module
    :undoc-members:
    :show-inheritance:
 
-mcts.connectfour.wrapped module
--------------------------------
-
-.. automodule:: mcts.connectfour.wrapped
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------

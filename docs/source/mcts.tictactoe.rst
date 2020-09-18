@@ -20,14 +20,6 @@ mcts.tictactoe.wrapped module
    :undoc-members:
    :show-inheritance:
 
-mcts.tictactoe.wrapped module
------------------------------
-
-.. automodule:: mcts.tictactoe.wrapped
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 
 Module contents
 ---------------

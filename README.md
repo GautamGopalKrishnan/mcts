@@ -9,6 +9,9 @@ Install by cloning the repository with
 and building with
 
     python setup.py build_ext -i
+    
+    
+![](images/mcts_games_menu.png)
 
 ## Playing a Game
 Run the main application with
