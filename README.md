@@ -38,7 +38,7 @@ Select player from the menu.
 
 ![](images/checkers_menu.png)
 
-Click on the piece you want to move and then to the square that you want to move it to.
+Click on the piece you want to move and then click the square where you want the piece to move to.
 
 ![](images/checkers.png)
 
