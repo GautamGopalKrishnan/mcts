@@ -9,9 +9,6 @@ Install by cloning the repository with
 and building with
 
     python setup.py build_ext -i
-    
-    
-![](images/mcts_games_menu.png)
 
 ## Playing a Game
 Run the main application with
@@ -19,6 +16,31 @@ Run the main application with
     python run.py
 
 which will prompt you to select a game and choose a player.
+
+![](images/mcts_games_menu.png)
+
+## Tic-Tac-Toe
+Select player from the menu and click on the box where you want to make your move.
+
+![](images/tictactoe_menu.png)
+
+![](images/tictactoe.png)
+
+## Connect Four 
+Select player from the menu and click on the column number where you want to make your move.
+
+![](images/connectfour_menu.png)
+
+![](images/connectfour.png)
+
+## Checkers
+Select player from the menu.
+
+![](images/checkers_menu.png)
+
+Click on the piece you want to move and then to the square that you want to move it to.
+
+![](images/checkers.png)
 
 ## Running Tests
 Basic checks of the package are performed with
