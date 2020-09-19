@@ -1,6 +1,12 @@
 # mcts
 Monte Carlo tree search applied to several games.
 
+This project has a python implementation of Monte Carlo tree search applied to Tic-Tac-Toe, Connect Four and Checkers which was later wrapped with a cython implementation to improve performance (by a factor of 10).
+
+- Tree policy at selection step has an epsilon-greedy implementation (with epsilon = 0.05) and an upper confidence bound (UCB) implementation (with c=sqrt(2))
+- Number of rollouts performed is limited by the timeout value which is set to a default of 1.0 second
+- Values at each node of game tree stores average expected reward based on Monte Carlo prediction
+
 ## Installation
 Install by cloning the repository with
 
