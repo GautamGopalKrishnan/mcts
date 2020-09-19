@@ -1,5 +1,5 @@
 # mcts
-Monte Carlo tree search applied to several games.
+Monte Carlo tree search applied to several games, implementing techniques and principles of reinforcement learning.
 
 This project has a python implementation of Monte Carlo tree search applied to Tic-Tac-Toe, Connect Four and Checkers which was later wrapped with a cython implementation to improve performance (by a factor of 10).
 
@@ -7,7 +7,7 @@ This project has a python implementation of Monte Carlo tree search applied to T
 - Number of rollouts performed is limited by the timeout value which is set to a default of 1.0 second
 - Values at each node of game tree stores average expected reward based on Monte Carlo prediction
 
-You can find below the instructions (with images) to install and run the games.
+You can find below the instructions (with images) to install and play the games.
 
 ## Installation
 Install by cloning the repository with
