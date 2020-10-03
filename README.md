@@ -7,7 +7,7 @@ This project has a Python implementation of Monte Carlo tree search applied to [
 - Number of rollouts performed is limited by the timeout value which is set to a default of 1.0 second
 - Values at each node of game tree stores average expected reward based on Monte Carlo simulation
 
-Our code for the agent and various environments (written in Python 3) can be found under [mcts](mcts) directory. Some results of our hyperparameter tuning can be found under [notebooks](notebooks).
+Our code for the agent and various environments (written in Python 3) can be found under [mcts](mcts) directory. Some results of our hyperparameter tuning can be found under [data](data) and [notebooks](notebooks).
 
 You can find below the instructions (with images) to install and play the games.
 
