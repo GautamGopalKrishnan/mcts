@@ -13,7 +13,7 @@ class RandomAgent:
         return random.choice(env.actions)
 
 
-def epsilon_greedy(epsilon=0.05):
+def epsilon_greedy(epsilon=0.09):
     """Return an epsilon-greedy tree policy."""
     def policy(node):
         if random.random() < epsilon:
